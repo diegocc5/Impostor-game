@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Anfitrión - El Impostor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #0f172a 0%, #000000 100%);
+            min-height: 100vh;
+        }
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+</head>
+<body class="text-white flex flex-col items-center pt-10 pb-20 relative overflow-x-hidden">
+
+    <!-- Background Orbs -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div class="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] bg-red-600 rounded-full mix-blend-screen filter blur-[150px] opacity-20 animate-float"></div>
+        <div class="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-blue-600 rounded-full mix-blend-screen filter blur-[150px] opacity-20 animate-float" style="animation-delay: 2s;"></div>
+    </div>
+
+    <div class="max-w-3xl w-full px-4">
+        <h1 class="text-5xl font-black text-center text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-yellow-500 to-orange-500 mb-10 drop-shadow-2xl flex justify-center items-center">
+            <i class="fas fa-satellite text-red-500 mr-4"></i>Nave Principal
+        </h1>
+
+        <!-- LOBBY SCREEN -->
+        <div id="host-lobby" class="glass-panel rounded-3xl p-8 mb-6 transition-all">
+            
+            <div class="flex flex-col md:flex-row gap-8 mb-8 border-b border-white/10 pb-8">
+                <!-- QR Code Section -->
+                <div class="flex-1 flex flex-col items-center justify-center bg-black/40 p-6 rounded-3xl border border-white/5">
+                    <p class="text-gray-400 font-bold tracking-widest uppercase text-sm mb-4"><i class="fas fa-qrcode mr-2"></i>Escanea para entrar</p>
+                    <div id="qr-container" class="bg-transparent p-2 border-4 border-white/10 rounded-2xl mb-4 min-h-[200px] min-w-[200px] flex items-center justify-center">
+                        <i class="fas fa-spinner fa-spin text-4xl text-gray-600"></i>
+                    </div>
+                    <div class="text-center w-full">
+                        <p class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Enlace alternativo:</p>
+                        <p class="text-sm font-mono text-blue-400 bg-blue-900/20 px-3 py-2 rounded-lg break-all" id="ip-display">Cargando...</p>
+                    </div>
+                </div>
+
+                <!-- Room Info -->
+                <div class="flex-1 flex flex-col justify-center text-center">
+                    <p class="text-gray-400 font-bold uppercase tracking-widest text-sm mb-2">Código de Sala</p>
+                    <div class="text-8xl font-black tracking-widest text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.3)] mb-6" id="room-code-display">----</div>
+                    
+                    <!-- Join as Player from Host -->
+                    <div class="bg-blue-950/40 p-5 rounded-2xl border border-blue-500/30 shadow-inner" id="host-join-container">
+                        <h4 class="text-blue-300 font-bold text-sm mb-3"><i class="fas fa-user-plus mr-2"></i>¿Juegas tú también?</h4>
+                        <div class="flex gap-2">
+                            <input type="text" id="host-player-name" placeholder="Tu nombre..." class="flex-1 bg-black/50 border border-white/10 text-white rounded-xl px-4 py-2 focus:border-blue-500 focus:outline-none placeholder-gray-600 font-medium text-sm">
+                            <button id="btn-host-join" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2 rounded-xl transition text-sm">Unirme</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Players List -->
+            <div class="mb-10">
+                <h3 class="text-2xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-users text-blue-400 mr-3"></i> Tripulación (<span id="player-count">0</span>/12)
+                </h3>
+                <div id="players-list" class="flex flex-wrap gap-3 p-5 bg-black/40 rounded-2xl min-h-[100px] border border-white/5 shadow-inner">
+                    <div class="w-full text-center text-gray-500 italic font-medium pt-2">Esperando a que la tripulación escanee el QR...</div>
+                </div>
+            </div>
+
+            <!-- Settings -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                
+                <div class="bg-black/40 p-6 rounded-2xl border border-white/10 shadow-inner">
+                    <h4 class="text-gray-400 font-bold uppercase tracking-widest text-xs mb-4">Configuración Básica</h4>
+                    
+                    <label class="block text-sm font-bold text-gray-300 mb-2">
+                        <i class="fas fa-user-ninja mr-1 text-red-500"></i>Cantidad de Impostores
+                    </label>
+                    <select id="num-impostors" class="w-full bg-gray-900 border border-white/10 text-white rounded-xl px-4 py-3 mb-4 focus:ring-2 focus:ring-red-500 focus:outline-none appearance-none cursor-pointer text-center font-bold">
+                        <option value="1">1 Impostor</option>
+                        <option value="2">2 Impostores</option>
+                        <option value="3">3 Impostores</option>
+                        <option value="4">4 Impostores</option>
+                    </select>
+
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="block text-sm font-bold text-gray-300"><i class="fas fa-lightbulb mr-2 text-yellow-500"></i>Pista al Impostor</span>
+                            <span class="text-xs text-gray-500 mt-1 block max-w-[150px]">El impostor sabrá la categoría del tema.</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="hint-toggle" class="sr-only peer" checked>
+                            <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="bg-black/40 p-6 rounded-2xl border border-white/10 shadow-inner relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-3 opacity-10"><i class="fas fa-mask text-6xl text-white"></i></div>
+                    <h4 class="text-gray-400 font-bold uppercase tracking-widest text-xs mb-4 relative z-10">Roles Avanzados</h4>
+                    
+                    <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-4 relative z-10">
+                        <div>
+                            <span class="block text-sm font-bold text-purple-400">El Bufón 🃏</span>
+                            <span class="text-xs text-gray-500 mt-1 block max-w-[180px]">Su objetivo es que lo echen. ¡Conoce la palabra!</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="jester-toggle" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-4 relative z-10">
+                        <div>
+                            <span class="block text-sm font-bold text-pink-400">Los Gemelos 👯</span>
+                            <span class="text-xs text-gray-500 mt-1 block max-w-[180px]">Dos jugadores confirmarán su inocencia mutuamente.</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="twins-toggle" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-500"></div>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between relative z-10">
+                        <div>
+                            <span class="block text-sm font-bold text-red-400">Modo Tabú 💣</span>
+                            <span class="text-xs text-gray-500 mt-1 block max-w-[180px]">La palabra secreta trae 4 castigos que no se pueden pronunciar.</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="taboo-toggle" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+
+            <button id="start-btn" disabled class="w-full bg-gradient-to-r from-red-600 via-red-500 to-orange-600 hover:from-red-500 hover:to-orange-500 disabled:from-gray-700 disabled:to-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed text-white font-black py-5 px-4 rounded-2xl shadow-[0_10px_30px_rgba(239,68,68,0.4)] flex items-center justify-center text-xl transition-all transform active:scale-95 border border-white/10 uppercase tracking-wider">
+                <i class="fas fa-play mr-3"></i> Comenzar Partida
+            </button>
+            <p class="text-xs font-bold uppercase tracking-widest text-center text-red-400 mt-3" id="start-warning">Mínimo 3 jugadores necesarios</p>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="host-game" class="hidden glass-panel rounded-3xl p-10 text-center relative overflow-hidden">
+            <!-- Pulsing background decoration -->
+            <div class="absolute inset-0 bg-green-500/5 animate-pulse z-0 pointer-events-none"></div>
+
+            <h2 class="text-4xl font-extrabold mb-4 text-green-400 drop-shadow relative z-10">¡Partida en Curso!</h2>
+            <p class="text-gray-300 mb-10 text-lg relative z-10">Los jugadores han recibido su rol en sus dispositivos.</p>
+            
+            <div class="relative z-10 w-full max-w-sm mx-auto mb-10">
+                <p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-2">Tema de la ronda</p>
+                <div id="category-display" class="text-3xl text-yellow-400 font-black p-5 bg-black/50 border border-yellow-500/30 rounded-2xl shadow-inner w-full">
+                    Cargando categoría...
+                </div>
+            </div>
+
+            <!-- Host's Secret Role (if playing) -->
+            <div id="host-secret-role" class="hidden mb-12 relative z-10 max-w-sm mx-auto">
+                <div class="bg-indigo-900/40 p-1 rounded-2xl border-2 border-indigo-500/50 relative overflow-hidden group cursor-pointer transition-all hover:bg-indigo-900/60 shadow-[0_0_20px_rgba(99,102,241,0.3)]">
+                    <div id="host-role-trigger" class="absolute inset-0 z-20 flex items-center justify-center bg-gray-900 backdrop-blur-md transition-opacity">
+                        <i class="fas fa-eye-slash text-indigo-400 mr-2"></i><span class="font-bold text-indigo-300 uppercase tracking-wider">Ver Mi Rol Secreto</span>
+                    </div>
+                    <div id="host-role-content" class="p-6 text-center filter blur-[10px] min-h-[100px] flex items-center justify-center flex-col">
+                        <!-- Role rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-[8rem] leading-none font-mono font-black text-white mb-12 drop-shadow-[0_0_40px_rgba(255,255,255,0.4)] tracking-wider relative z-10" id="timer-display">
+                05:00
+            </div>
+
+            <button id="end-game-btn" class="relative z-10 w-full max-w-md mx-auto bg-gray-800 hover:bg-red-600 text-white font-black py-4 px-4 rounded-xl shadow-lg border border-white/10 hover:border-red-500/50 flex items-center justify-center transition-all text-xl uppercase tracking-wider">
+                <i class="fas fa-stop-circle mr-3"></i> Detener Tiempo
+            </button>
+        </div>
+
+        <!-- RESULTS SCREEN -->
+        <div id="host-results" class="hidden glass-panel rounded-3xl p-10 text-center">
+            <h2 id="results-title" class="text-5xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500 drop-shadow-md">¡Hora de Votar!</h2>
+            <p class="text-gray-300 mx-auto text-xl mb-10 font-medium">Debatan entre ustedes. ¿Quién creeis que es el impostor?</p>
+
+            <button id="reveal-btn" class="w-full max-w-lg mx-auto bg-gradient-to-b from-yellow-500 to-orange-600 hover:from-yellow-400 hover:to-orange-500 text-white font-black py-6 px-6 rounded-2xl shadow-[0_10px_30px_rgba(234,179,8,0.4)] mb-8 flex items-center justify-center transition-all text-2xl uppercase tracking-widest border border-white/20 animate-pulse">
+                Desvelar Misterio <i class="fas fa-unlock ml-3"></i>
+            </button>
+
+            <div id="reveal-details" class="hidden bg-black/60 p-8 rounded-3xl border border-white/10 mb-8 shadow-inner backdrop-blur-md max-w-2xl mx-auto">
+                <!-- Impostor inyectado aquí -->
+            </div>
+
+            <button id="restart-btn" class="hidden w-full max-w-md mx-auto bg-blue-600 hover:bg-blue-500 text-white font-black py-5 px-4 rounded-2xl shadow-[0_10px_20px_rgba(37,99,235,0.4)] flex items-center justify-center transition-all text-xl uppercase tracking-wider border border-white/10">
+                <i class="fas fa-redo-alt mr-3"></i> Siguiente Ronda
+            </button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        
+        let connectedPlayers = 0;
+        let timerInterval = null;
+        let secondsRemaining = 300;
+        let iAmPlaying = false; // Is host playing?
+
+        const screens = {
+            lobby: document.getElementById('host-lobby'),
+            game: document.getElementById('host-game'),
+            results: document.getElementById('host-results')
+        };
+
+        function showScreen(name) {
+            for(let key in screens) {
+                screens[key].classList.add('hidden');
+                screens[key].classList.remove('animate-[fadeIn_0.5s_ease-out]');
+            }
+            screens[name].classList.remove('hidden');
+        }
+
+        // Host registration
+        socket.on('connect', () => {
+            socket.emit('registerAsHost');
+        });
+
+        socket.on('hostRegistered', (data) => {
+            const roomCode = data.roomCode;
+            document.getElementById('room-code-display').textContent = roomCode;
+            
+            // Determinar la URL para el QR. En Cloud (glitch) data.ip sera localhost, asi que mejor usamos window.location.host
+            const protocol = window.location.protocol;
+            const host = window.location.host;
+            const url = `${protocol}//${host}/player.html?room=${roomCode}`;
+            
+            document.getElementById('ip-display').textContent = url;
+
+            // Generate QR Code
+            const qrContainer = document.getElementById('qr-container');
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, {
+                text: url,
+                width: 220,
+                height: 220,
+                colorDark : "#ffffff",
+                colorLight : "#00000000",
+                correctLevel : QRCode.CorrectLevel.M
+            });
+            // Hack para que QR code ponga blando sobre oscuro
+            setTimeout(() => {
+                const img = qrContainer.querySelector('img');
+                const canvas = qrContainer.querySelector('canvas');
+                if(img) { img.style.backgroundColor = "transparent"; }
+                if(canvas) { canvas.style.backgroundColor = "transparent"; }
+            }, 100);
+        });
+
+        // Evento cuando el Host decide unirse como jugador
+        document.getElementById('btn-host-join').addEventListener('click', () => {
+            const name = document.getElementById('host-player-name').value.trim();
+            if(!name) return alert("Pon tu nombre primero.");
+            const roomCode = document.getElementById('room-code-display').textContent;
+            
+            // Usamos la misma conexión de socket para registrarnos a la room.
+            socket.emit('joinRoom', { playerName: name, roomCode }, (res) => {
+                if(res.success) {
+                    iAmPlaying = true;
+                    document.getElementById('host-join-container').innerHTML = 
+                        `<div class="text-green-400 font-bold flex items-center justify-center p-2"><i class="fas fa-check-circle mr-2 text-2xl"></i> ¡Estás unido a la partida como jugador!</div>`;
+                } else {
+                    alert(res.message);
+                }
+            });
+        });
+
+
+        socket.on('playerJoined', (data) => {
+            const list = document.getElementById('players-list');
+            connectedPlayers = data.players.length;
+            document.getElementById('player-count').textContent = connectedPlayers;
+            
+            list.innerHTML = '';
+            if (connectedPlayers === 0) {
+                list.innerHTML = '<div class="w-full text-center text-gray-500 font-medium italic pt-2">Esperando a que la tripulación escanee el QR...</div>';
+            } else {
+                data.players.forEach(p => {
+                    const el = document.createElement('div');
+                    el.className = 'bg-blue-600/20 border border-blue-500/50 text-blue-100 px-4 py-2 rounded-full font-bold shadow flex items-center backdrop-blur-sm animate-[popIn_0.3s_ease-out]';
+                    el.innerHTML = `<i class="fas fa-user-astronaut mr-2 opacity-50"></i> ${p}`;
+                    list.appendChild(el);
+                });
+            }
+
+            const startBtn = document.getElementById('start-btn');
+            const startWarn = document.getElementById('start-warning');
+            if (connectedPlayers >= 3) {
+                startBtn.disabled = false;
+                startWarn.textContent = "¡Todo listo para despegar!";
+                startWarn.classList.remove('text-red-400');
+                startWarn.classList.add('text-green-400');
+            } else {
+                startBtn.disabled = true;
+                startWarn.textContent = "Mínimo 3 jugadores necesarios";
+                startWarn.classList.remove('text-green-400');
+                startWarn.classList.add('text-red-400');
+            }
+        });
+
+        socket.on('errorMsg', (msg) => { alert(msg); });
+
+        // Start Game
+        document.getElementById('start-btn').addEventListener('click', () => {
+            const giveHint = document.getElementById('hint-toggle').checked;
+            const numImpostors = parseInt(document.getElementById('num-impostors').value) || 1;
+            const hasJester = document.getElementById('jester-toggle').checked;
+            const hasTwins = document.getElementById('twins-toggle').checked;
+            const isTabooMode = document.getElementById('taboo-toggle').checked;
+            
+            socket.emit('startGame', { giveHint, numImpostors, hasJester, hasTwins, isTabooMode });
+        });
+
+        socket.on('gameStarted', (data) => {
+            document.getElementById('category-display').textContent = data.category;
+            
+            secondsRemaining = 300;
+            updateTimer();
+            if(timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                secondsRemaining--;
+                updateTimer();
+                if(secondsRemaining <= 0) {
+                    socket.emit('endGame');
+                    showResultsScreen("¡Tiempo Agotado!");
+                }
+            }, 1000);
+            
+            // If host is playing, prepare the secret role box
+            if (iAmPlaying) {
+                document.getElementById('host-secret-role').classList.remove('hidden');
+                document.getElementById('host-role-content').classList.add('blur-[10px]');
+                document.getElementById('host-role-trigger').style.opacity = '1';
+                document.getElementById('host-role-trigger').style.pointerEvents = 'auto';
+            } else {
+                document.getElementById('host-secret-role').classList.add('hidden');
+            }
+
+            showScreen('game');
+        });
+
+        // Escuchar el evento receiveRole si el host también está jugando
+        socket.on('receiveRole', (roleData) => {
+            const content = document.getElementById('host-role-content');
+            
+            if (roleData.isImpostor) {
+                content.innerHTML = `<h3 class="text-red-400 font-bold mb-1">¡ERES EL IMPOSTOR!</h3><p class="text-sm text-gray-300">Finge que sabes.</p>`;
+            } else if (roleData.isJester) {
+                content.innerHTML = `<h3 class="text-purple-400 font-bold mb-1">¡ERES EL BUFÓN!</h3><p class="text-sm text-gray-300">Haz que sospechen.</p><p class="text-white font-bold mt-2">${roleData.word}</p>`;
+            } else if (roleData.isTwin) {
+                content.innerHTML = `<h3 class="text-pink-400 font-bold mb-1">GEMELO INOCENTE</h3><p class="text-white font-bold text-lg mt-1">${roleData.word}</p><p class="text-xs text-pink-300 mt-2">Aliado: ${roleData.otherTwinName}</p>`;
+            } else {
+                content.innerHTML = `<h3 class="text-blue-400 font-bold mb-1">CIUDADANO</h3><p class="text-xs text-gray-400 mb-1">La palabra es:</p><p class="text-white font-bold text-xl">${roleData.word}</p>`;
+            }
+        });
+
+        // Interacciones para desvelar el rol del host
+        const trigger = document.getElementById('host-role-trigger');
+        const rContent = document.getElementById('host-role-content');
+        
+        function revealHost() {
+            trigger.style.opacity = '0';
+            trigger.style.pointerEvents = 'none';
+            rContent.classList.remove('blur-[10px]');
+        }
+        function hideHost() {
+            trigger.style.opacity = '1';
+            trigger.style.pointerEvents = 'auto';
+            rContent.classList.add('blur-[10px]');
+        }
+        
+        trigger.addEventListener('mousedown', revealHost);
+        document.getElementById('host-secret-role').addEventListener('mouseup', hideHost);
+        document.getElementById('host-secret-role').addEventListener('mouseleave', hideHost);
+        trigger.addEventListener('touchstart', (e) => { e.preventDefault(); revealHost(); });
+        document.getElementById('host-secret-role').addEventListener('touchend', (e) => { e.preventDefault(); hideHost(); });
+
+
+        function updateTimer() {
+            const mins = Math.floor(secondsRemaining / 60);
+            const secs = secondsRemaining % 60;
+            const display = document.getElementById('timer-display');
+            display.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            if(secondsRemaining <= 60 && secondsRemaining > 0) {
+                display.classList.add('text-red-500', 'animate-pulse');
+                display.classList.remove('text-white');
+            } else {
+                display.classList.remove('text-red-500', 'animate-pulse');
+                display.classList.add('text-white');
+            }
+        }
+
+        document.getElementById('end-game-btn').addEventListener('click', () => {
+            socket.emit('endGame');
+            showResultsScreen("Votación Anticipada");
+        });
+
+        function showResultsScreen(titleText) {
+            if(timerInterval) clearInterval(timerInterval);
+            document.getElementById('results-title').textContent = titleText;
+            showScreen('results');
+        }
+
+        document.getElementById('reveal-btn').addEventListener('click', () => {
+            socket.emit('revealImpostor');
+            document.getElementById('reveal-btn').classList.add('hidden');
+        });
+
+        socket.on('impostorRevealed', (data) => {
+            const details = document.getElementById('reveal-details');
+            const impostorsText = data.impostors.length > 1 ? "Los Impostores eran" : "El Impostor era";
+            const impostorsNames = data.impostors.join(', ');
+            
+            let html = `
+                <p class="text-gray-400 font-bold uppercase tracking-widest text-sm mb-2">${impostorsText}</p>
+                <h3 class="text-5xl font-black text-red-500 mb-8 drop-shadow-[0_0_20px_rgba(239,68,68,0.3)]">${impostorsNames}</h3>
+                
+                <div class="border-t border-white/10 my-6 mx-10"></div>
+                
+                <p class="text-gray-400 text-sm font-bold uppercase tracking-widest mb-2">La palabra secreta ha sido:</p>
+                <p class="font-black text-5xl text-yellow-400 drop-shadow">${data.word}</p>
+            `;
+
+            if (data.isTabooMode && data.taboos) {
+                html += `
+                <div class="mt-8 p-4 bg-red-950/40 border border-red-500/30 rounded-2xl text-left">
+                    <p class="text-red-400 font-bold uppercase tracking-wider text-xs mb-2"><i class="fas fa-bomb mr-2"></i>Palabras Tabú:</p>
+                    <p class="text-xl font-bold text-white">${data.taboos.join(" - ")}</p>
+                </div>`;
+            }
+
+            if (data.jester) {
+                html += `
+                <div class="mt-4 p-4 bg-purple-950/40 border border-purple-500/30 rounded-2xl text-left flex items-center">
+                    <div class="bg-purple-500/20 p-3 rounded-full mr-4"><i class="fas fa-hat-wizard text-purple-300"></i></div>
+                    <div>
+                        <p class="text-purple-300 font-bold uppercase tracking-wider text-xs mb-1">El Bufón / Jester:</p>
+                        <p class="text-xl font-bold text-white">${data.jester}</p>
+                    </div>
+                </div>`;
+            }
+
+            if (data.twins) {
+                html += `
+                <div class="mt-4 p-4 bg-pink-950/40 border border-pink-500/30 rounded-2xl text-left flex items-center">
+                    <div class="bg-pink-500/20 p-3 rounded-full mr-4"><i class="fas fa-user-friends text-pink-300"></i></div>
+                    <div>
+                        <p class="text-pink-300 font-bold uppercase tracking-wider text-xs mb-1">Los Gemelos:</p>
+                        <p class="text-xl font-bold text-white">${data.twins.join(" y ")}</p>
+                    </div>
+                </div>`;
+            }
+
+            details.innerHTML = html;
+            details.classList.remove('hidden');
+            details.classList.add('animate-[fadeIn_1s_ease-out]');
+            document.getElementById('restart-btn').classList.remove('hidden');
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            socket.emit('restartGame');
+            document.getElementById('reveal-details').classList.add('hidden');
+            document.getElementById('reveal-btn').classList.remove('hidden');
+            document.getElementById('restart-btn').classList.add('hidden');
+            showScreen('lobby');
+        });
+
+    </script>
+</body>
+</html>
