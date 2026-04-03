@@ -543,6 +543,11 @@ io.on('connection', (socket) => {
             } else {
                 // Si la partida ha empezado, no borramos su índice, solo lo marcamos para no romper el array de Roles
                 roomState.players[playerIndex].disconnected = true;
+                if (roomState.hostSocketId) {
+                    const activeCount = roomState.players.filter(p => !p.disconnected).length;
+                    const totalVotes = Object.keys(roomState.votes).length;
+                    io.to(roomState.hostSocketId).emit('playerDisconnectedMidgame', { activeCount, totalVotes });
+                }
             }
         }
         if (socket.id === roomState.hostSocketId) {
