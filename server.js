@@ -35,11 +35,12 @@ let roomState = {
     roomCode: '1234',
     hostSocketId: null,
     players: [], // { socketId, name, roleData }
-    status: 'lobby', // lobby, playing, results
+    status: 'lobby', // lobby, playing, voting, results
     gameSettings: {
         giveHint: true
     },
-    pickedWord: null
+    pickedWord: null,
+    votes: {} // playerName -> votedName
 };
 
 // Banco de palabras Premium (250 palabras con Tabúes)
@@ -158,7 +159,6 @@ const WORD_BANK = {
         { word: "Francia", taboos: ["París", "Europa", "Torre Eiffel", "Croissant"] },
         { word: "Italia", taboos: ["Pizza", "Pasta", "Roma", "Europa"] },
         { word: "China", taboos: ["Asia", "Muralla", "Población", "Mandarín"] },
-        { word: "Egipto", taboos: ["Pirámides", "África", "Faraón", "Desierto"] },
         { word: "Reino Unido", taboos: ["Londres", "Inglés", "Té", "Rey"] },
         { word: "Alemania", taboos: ["Berlín", "Cerveza", "Europa", "Salchichas"] },
         { word: "Portugal", taboos: ["Lisboa", "Vecino", "Cristiano", "Cristiano Ronaldo"] },
@@ -175,13 +175,9 @@ const WORD_BANK = {
         { word: "Suiza", taboos: ["Relojes", "Chocolate", "Queso", "Montañas"] },
         { word: "Suecia", taboos: ["IKEA", "Rubios", "Frío", "Norte"] },
         { word: "Noruega", taboos: ["Fiordos", "Vikingos", "Frío", "Norte"] },
-        { word: "Marruecos", taboos: ["Desierto", "Cuscús", "África", "Abajo"] },
         { word: "Turquía", taboos: ["Estambul", "Kebab", "Pelo", "Mezquita"] },
         { word: "Tailandia", taboos: ["Asia", "Playa", "Buda", "Picante"] },
         { word: "Vietnam", taboos: ["Asia", "Guerra", "Sombrero", "Moto"] },
-        { word: "Sudáfrica", taboos: ["Mandela", "Animales", "Abajo", "Safaris"] },
-        { word: "Madagascar", taboos: ["Isla", "Película", "África", "Lémur"] },
-        { word: "Kenia", taboos: ["Correr", "Safaris", "Leones", "África"] },
         { word: "Jamaica", taboos: ["Marley", "Fumar", "Correr", "Isla"] },
         { word: "Ecuador", taboos: ["Mitad", "América", "Galápagos", "Selva"] },
         { word: "Venezuela", taboos: ["Arepas", "Petróleo", "América", "Caracas"] },
@@ -331,6 +327,7 @@ io.on('connection', (socket) => {
         // Generar un nuevo código de sala 4 dígitos
         roomState.roomCode = Math.floor(1000 + Math.random() * 9000).toString();
         roomState.players = [];
+        roomState.votes = {};
         roomState.status = 'lobby';
         socket.emit('hostRegistered', { roomCode: roomState.roomCode, ip: LOCAL_IP });
         console.log(`Host registrado. Código: ${roomState.roomCode}`);
@@ -441,14 +438,28 @@ io.on('connection', (socket) => {
         io.to(roomState.hostSocketId).emit('gameStarted', { category: pickedWord.category });
     });
 
-    // Finalizar juego
+    // Finalizar juego y pasar a Votación
     socket.on('endGame', () => {
         if (socket.id !== roomState.hostSocketId) return;
-        roomState.status = 'results';
-        // Avisar a todos los móviles que terminó el tiempo
+        roomState.status = 'voting';
+        roomState.votes = {}; // reiniciar votos
+        
+        const playerNames = roomState.players.map(p => p.name);
         roomState.players.forEach(p => {
-            io.to(p.socketId).emit('gameOver');
+            io.to(p.socketId).emit('startVoting', { players: playerNames, me: p.name });
         });
+    });
+
+    // Jugador envía su voto
+    socket.on('submitVote', (votedName) => {
+        const voter = roomState.players.find(p => p.socketId === socket.id);
+        if(!voter) return;
+        roomState.votes[voter.name] = votedName;
+        
+        // Notificar al host que llegó un voto
+        if(roomState.hostSocketId) {
+            io.to(roomState.hostSocketId).emit('voteReceived', { totalVotes: Object.keys(roomState.votes).length });
+        }
     });
 
     // Revelar Impostor
@@ -468,6 +479,21 @@ io.on('connection', (socket) => {
             twins = [roomState.players[twinIndices[0]].name, roomState.players[twinIndices[1]].name];
         }
         
+        // Recuento de Votos
+        let voteTally = {};
+        let highestVoted = [];
+        let maxVotes = 0;
+
+        Object.values(roomState.votes).forEach(vote => {
+            voteTally[vote] = (voteTally[vote] || 0) + 1;
+            if(voteTally[vote] > maxVotes) {
+                maxVotes = voteTally[vote];
+                highestVoted = [vote];
+            } else if (voteTally[vote] === maxVotes) {
+                highestVoted.push(vote);
+            }
+        });
+
         const revealData = {
             impostors,
             jester,
@@ -475,7 +501,10 @@ io.on('connection', (socket) => {
             word: roomState.pickedWord.word,
             category: roomState.pickedWord.category,
             taboos: roomState.pickedWord.taboos,
-            isTabooMode: roomState.gameSettings.isTabooMode
+            isTabooMode: roomState.gameSettings.isTabooMode,
+            votes: roomState.votes,
+            highestVoted,
+            maxVotes
         };
 
         io.to(roomState.hostSocketId).emit('impostorRevealed', revealData);
@@ -489,7 +518,12 @@ io.on('connection', (socket) => {
     socket.on('restartGame', () => {
         if (socket.id !== roomState.hostSocketId) return;
         roomState.status = 'lobby';
-        // Mantener a los jugadores en la sala
+        roomState.votes = {};
+        
+        // Limpiar jugadores que se desconectaron durante la partida
+        roomState.players = roomState.players.filter(p => !p.disconnected);
+
+        // Mantener a los jugadores activos en la sala
         io.to(roomState.hostSocketId).emit('playerJoined', { players: roomState.players.map(p => p.name) });
         roomState.players.forEach(p => {
             io.to(p.socketId).emit('backToLobby');
@@ -497,13 +531,18 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        // Remover jugador si se desconecta
+        // Manejar la desconexión del jugador de forma segura
         const playerIndex = roomState.players.findIndex(p => p.socketId === socket.id);
         if (playerIndex !== -1) {
-            const player = roomState.players[playerIndex];
-            roomState.players.splice(playerIndex, 1);
-            if (roomState.hostSocketId) {
-                io.to(roomState.hostSocketId).emit('playerJoined', { players: roomState.players.map(p => p.name) });
+            if (roomState.status === 'lobby') {
+                // Si estamos en el lobby, podemos borrarlo sin afectar a los índices del juego
+                roomState.players.splice(playerIndex, 1);
+                if (roomState.hostSocketId) {
+                    io.to(roomState.hostSocketId).emit('playerJoined', { players: roomState.players.map(p => p.name) });
+                }
+            } else {
+                // Si la partida ha empezado, no borramos su índice, solo lo marcamos para no romper el array de Roles
+                roomState.players[playerIndex].disconnected = true;
             }
         }
         if (socket.id === roomState.hostSocketId) {
