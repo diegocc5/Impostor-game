@@ -508,7 +508,25 @@
             socket.emit('restartGame');
         });
 
-        socket.on('returnToLobby', () => location.reload());
+        socket.on('returnToLobby', () => {
+            // No recargamos para no perder la conexión ni resetear la sala en el servidor
+            if (timerInterval) clearInterval(timerInterval);
+            secondsRemaining = 300;
+            updateTimer();
+            
+            // Limpiar UI de resultados
+            document.getElementById('reveal-details').classList.add('hidden');
+            document.getElementById('next-round-btn').classList.add('hidden');
+            document.getElementById('restart-btn').classList.add('hidden');
+            document.getElementById('host-voting-panel').classList.add('hidden');
+            
+            // Volver al lobby
+            showScreen('lobby');
+            
+            // La lista de jugadores se actualizará sola si emitimos un evento o si el servidor lo hace
+            // Pero como no hemos desconectado, el estado 'connectedPlayers' sigue siendo válido
+            alivePlayers = connectedPlayers;
+        });
 
     </script>
 </body>

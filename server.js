@@ -399,8 +399,29 @@ io.on('connection', (socket) => {
 
     socket.on('restartGame', () => {
         if (socket.id !== roomState.hostSocketId) return;
+        
+        // Reset individual player states but keep the list
+        roomState.players.forEach(p => {
+            p.eliminated = false;
+            p.disconnected = false; // Reset disconnect status just in case
+            p.roleData = null;
+        });
+        
         roomState.status = 'lobby';
+        roomState.votes = {};
+        
+        // Notify both host and players to go back to lobby screens
         io.emit('returnToLobby');
+        
+        // Ensure host has the player list updated in its view
+        if (roomState.hostSocketId) {
+            io.to(roomState.hostSocketId).emit('playerJoined', { 
+                players: roomState.players.map(p => p.name) 
+            });
+        }
+        
+        // Log it
+        console.log(`Partida reiniciada. Jugadores mantenidos: ${roomState.players.length}`);
     });
 
     socket.on('checkStatus', (callback) => {

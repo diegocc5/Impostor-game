@@ -373,7 +373,14 @@
             }
         });
 
-        socket.on('returnToLobby', () => { location.reload(); });
+        socket.on('returnToLobby', () => {
+            amEliminated = false;
+            // Reset de UI de votación
+            document.getElementById('vote-wait').classList.add('hidden');
+            document.getElementById('voting-list').innerHTML = '';
+            // Volver a la sala de espera
+            showScreen('waiting');
+        });
 
     </script>
 
