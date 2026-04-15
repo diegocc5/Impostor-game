@@ -194,26 +194,36 @@ io.on('connection', (socket) => {
     });
 
     // Jugador se une a la sala
-    socket.on('joinRoom', (data, callback) => {
-        const { playerName, roomCode } = data;
+        // Check if player with same name already exists (reconnection)
+        let existingPlayer = roomState.players.find(p => p.name.toLowerCase() === playerName.toLowerCase());
         
-        if (roomCode !== roomState.roomCode) {
-            return callback({ success: false, message: 'Código de sala incorrecto.' });
-        }
-        if (roomState.status !== 'lobby') {
-            return callback({ success: false, message: 'La partida ya ha comenzado.' });
+        if (existingPlayer) {
+            existingPlayer.socketId = socket.id;
+            existingPlayer.disconnected = false;
+            console.log(`Jugador re-conectado (mismo nombre): ${playerName}`);
+        } else {
+            const newPlayer = { socketId: socket.id, name: playerName, roleData: null, eliminated: false };
+            roomState.players.push(newPlayer);
+            console.log(`Jugador unido: ${playerName}`);
         }
 
-        const newPlayer = { socketId: socket.id, name: playerName, roleData: null };
-        roomState.players.push(newPlayer);
-        console.log(`Jugador unido: ${playerName}`);
-
-        // Notificar al host que alguien se unió
+        // Notificar al host que alguien se unió o se actualizó la lista
         if (roomState.hostSocketId) {
-            io.to(roomState.hostSocketId).emit('playerJoined', { players: roomState.players.map(p => p.name) });
+            io.to(roomState.hostSocketId).emit('playerJoined', { players: roomState.players.filter(p => !p.disconnected).map(p => p.name) });
         }
 
-        callback({ success: true });
+        callback({ success: true, isReconnection: !!existingPlayer });
+
+        // Si la partida ya ha empezado y el jugador tiene rol, se lo volvemos a enviar de inmediato
+        const p = existingPlayer || roomState.players[roomState.players.length - 1];
+        if (roomState.status !== 'lobby' && p && p.roleData) {
+            io.to(p.socketId).emit('receiveRole', p.roleData);
+            // También le enviamos el estado de 'gameStarted' para que la UI cambie de pantalla
+            io.to(p.socketId).emit('gameStarted', { 
+                category: roomState.pickedWord.category,
+                players: roomState.players.map(p2 => ({ name: p2.name, eliminated: p2.eliminated }))
+            });
+        }
     });
 
     // --- GAME LOGIC ---
@@ -392,9 +402,18 @@ io.on('connection', (socket) => {
         if (socket.id !== roomState.hostSocketId) return;
         roomState.status = 'playing';
         roomState.votes = {};
+        
+        // Informar del inicio de la nueva ronda
         io.emit('gameStarted', { 
             category: roomState.pickedWord.category,
             players: roomState.players.map(p => ({ name: p.name, eliminated: p.eliminated }))
+        });
+
+        // Re-enviar los roles a cada jugador para que su pantalla transicione de 'espera' a 'rol'
+        roomState.players.forEach(player => {
+            if (player.roleData && !player.disconnected) {
+                io.to(player.socketId).emit('receiveRole', player.roleData);
+            }
         });
     });
 

@@ -154,12 +154,37 @@
 
         // Auto-fill Room Code
         const urlParams = new URLSearchParams(window.location.search);
-        const roomParam = urlParams.get('room');
-        if (roomParam) {
-            document.getElementById('room-code').value = roomParam;
-            document.getElementById('room-code-container').classList.add('hidden');
-            document.getElementById('auto-room-badge').classList.remove('hidden');
+        let roomCodeFromUrl = urlParams.get('room');
+        if (roomCodeFromUrl) {
+            localStorage.setItem('lastRoomCode', roomCodeFromUrl);
         }
+        
+        const savedRoom = localStorage.getItem('lastRoomCode') || '';
+        if (savedRoom) {
+            document.getElementById('room-code').value = savedRoom;
+            if (roomCodeFromUrl) {
+                document.getElementById('room-code-container').classList.add('hidden');
+                document.getElementById('auto-room-badge').classList.remove('hidden');
+            }
+        }
+
+        // Auto-join if possible
+        function attemptAutoJoin() {
+            const name = localStorage.getItem('playerName');
+            const code = localStorage.getItem('lastRoomCode');
+            if (name && code && socket.connected) {
+                socket.emit('joinRoom', { playerName: name, roomCode: code }, (res) => {
+                    if (res.success) {
+                        console.log("Auto-unido con éxito");
+                        // Si ya está en una partida, el servidor enviará los eventos correspondientes
+                    }
+                });
+            }
+        }
+
+        socket.on('connect', () => {
+            attemptAutoJoin();
+        });
 
         if(myName) document.getElementById('player-name').value = myName;
 
@@ -173,6 +198,7 @@
 
             myName = playerName;
             localStorage.setItem('playerName', playerName);
+            localStorage.setItem('lastRoomCode', roomCode);
             errorP.classList.add('hidden');
             
             const btn = document.getElementById('join-btn');
