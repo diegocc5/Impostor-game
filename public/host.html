@@ -226,9 +226,14 @@
                 </div>
             </div>
 
-            <button id="restart-btn" class="hidden w-full max-w-md mx-auto bg-blue-600 hover:bg-blue-500 text-white font-black py-5 px-4 rounded-2xl shadow-[0_10px_20px_rgba(37,99,235,0.4)] flex items-center justify-center transition-all text-xl uppercase tracking-wider border border-white/10">
-                <i class="fas fa-redo-alt mr-3"></i> Siguiente Ronda
-            </button>
+            <div class="flex flex-col gap-4 max-w-md mx-auto w-full">
+                <button id="next-round-btn" class="hidden w-full bg-green-600 hover:bg-green-500 text-white font-black py-5 px-4 rounded-2xl shadow-[0_10px_20px_rgba(22,163,74,0.4)] flex items-center justify-center transition-all text-xl uppercase tracking-wider border border-white/10">
+                    <i class="fas fa-forward mr-3"></i> Siguiente Ronda
+                </button>
+                <button id="restart-btn" class="hidden w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-5 px-4 rounded-2xl shadow-[0_10px_20px_rgba(37,99,235,0.4)] flex items-center justify-center transition-all text-xl uppercase tracking-wider border border-white/10">
+                    <i class="fas fa-redo-alt mr-3"></i> Nueva Partida
+                </button>
+            </div>
         </div>
     </div>
 
@@ -236,128 +241,103 @@
     <script>
         const socket = io();
         
-        let connectedPlayers = 0;
+        let connectedPlayers = 0;   // jugadores totales en sala
+        let alivePlayers = 0;       // jugadores vivos (para denominar votos)
         let timerInterval = null;
         let secondsRemaining = 300;
-        let iAmPlaying = false; // Is host playing?
+        let iAmPlaying = false;
+        let hostPlayerName = '';
 
         const screens = {
-            lobby: document.getElementById('host-lobby'),
-            game: document.getElementById('host-game'),
+            lobby:   document.getElementById('host-lobby'),
+            game:    document.getElementById('host-game'),
             results: document.getElementById('host-results')
         };
 
         function showScreen(name) {
-            for(let key in screens) {
-                screens[key].classList.add('hidden');
-                screens[key].classList.remove('animate-[fadeIn_0.5s_ease-out]');
-            }
-            screens[name].classList.remove('hidden');
+            for(let key in screens) screens[key].classList.add('hidden');
+            if(screens[name]) screens[name].classList.remove('hidden');
         }
 
-        // Host registration
-        socket.on('connect', () => {
-            socket.emit('registerAsHost');
-        });
+        // ─── HOST REGISTRATION ──────────────────────────────────────────────
+        socket.on('connect', () => { socket.emit('registerAsHost'); });
 
         socket.on('hostRegistered', (data) => {
-            const roomCode = data.roomCode;
-            document.getElementById('room-code-display').textContent = roomCode;
-            
-            // Determinar la URL para el QR. En Cloud (glitch) data.ip sera localhost, asi que mejor usamos window.location.host
-            const protocol = window.location.protocol;
-            const host = window.location.host;
-            const url = `${protocol}//${host}/player.html?room=${roomCode}`;
-            
+            document.getElementById('room-code-display').textContent = data.roomCode;
+            const url = `${window.location.protocol}//${window.location.host}/player.html?room=${data.roomCode}`;
             document.getElementById('ip-display').textContent = url;
-
-            // Generate QR Code
             const qrContainer = document.getElementById('qr-container');
             qrContainer.innerHTML = '';
-            new QRCode(qrContainer, {
-                text: url,
-                width: 220,
-                height: 220,
-                colorDark : "#ffffff",
-                colorLight : "#00000000",
-                correctLevel : QRCode.CorrectLevel.M
-            });
-            // Hack para que QR code ponga blando sobre oscuro
+            new QRCode(qrContainer, { text: url, width: 220, height: 220, colorDark: "#ffffff", colorLight: "#00000000", correctLevel: QRCode.CorrectLevel.M });
             setTimeout(() => {
                 const img = qrContainer.querySelector('img');
                 const canvas = qrContainer.querySelector('canvas');
-                if(img) { img.style.backgroundColor = "transparent"; }
-                if(canvas) { canvas.style.backgroundColor = "transparent"; }
+                if(img) img.style.backgroundColor = "transparent";
+                if(canvas) canvas.style.backgroundColor = "transparent";
             }, 100);
         });
 
-        // Evento cuando el Host decide unirse como jugador
+        // ─── HOST JOINS AS PLAYER ────────────────────────────────────────────
         document.getElementById('btn-host-join').addEventListener('click', () => {
             const name = document.getElementById('host-player-name').value.trim();
             if(!name) return alert("Pon tu nombre primero.");
             const roomCode = document.getElementById('room-code-display').textContent;
-            
-            // Usamos la misma conexión de socket para registrarnos a la room.
             socket.emit('joinRoom', { playerName: name, roomCode }, (res) => {
                 if(res.success) {
                     iAmPlaying = true;
-                    document.getElementById('host-join-container').innerHTML = 
-                        `<div class="text-green-400 font-bold flex items-center justify-center p-2"><i class="fas fa-check-circle mr-2 text-2xl"></i> ¡Estás unido a la partida como jugador!</div>`;
+                    hostPlayerName = name;
+                    document.getElementById('host-join-container').innerHTML =
+                        `<div class="text-green-400 font-bold flex items-center justify-center p-2"><i class="fas fa-check-circle mr-2 text-2xl"></i>¡Estás unido como jugador!</div>`;
                 } else {
                     alert(res.message);
                 }
             });
         });
 
-
+        // ─── LOBBY: PLAYER LIST ──────────────────────────────────────────────
         socket.on('playerJoined', (data) => {
             const list = document.getElementById('players-list');
             connectedPlayers = data.players.length;
+            alivePlayers = connectedPlayers;
             document.getElementById('player-count').textContent = connectedPlayers;
-            
             list.innerHTML = '';
             if (connectedPlayers === 0) {
                 list.innerHTML = '<div class="w-full text-center text-gray-500 font-medium italic pt-2">Esperando a que la tripulación escanee el QR...</div>';
             } else {
                 data.players.forEach(p => {
                     const el = document.createElement('div');
-                    el.className = 'bg-blue-600/20 border border-blue-500/50 text-blue-100 px-4 py-2 rounded-full font-bold shadow flex items-center backdrop-blur-sm animate-[popIn_0.3s_ease-out]';
+                    el.className = 'bg-blue-600/20 border border-blue-500/50 text-blue-100 px-4 py-2 rounded-full font-bold shadow flex items-center backdrop-blur-sm';
                     el.innerHTML = `<i class="fas fa-user-astronaut mr-2 opacity-50"></i> ${p}`;
                     list.appendChild(el);
                 });
             }
-
             const startBtn = document.getElementById('start-btn');
             const startWarn = document.getElementById('start-warning');
             if (connectedPlayers >= 3) {
                 startBtn.disabled = false;
                 startWarn.textContent = "¡Todo listo para despegar!";
-                startWarn.classList.remove('text-red-400');
-                startWarn.classList.add('text-green-400');
+                startWarn.className = "text-xs font-bold uppercase tracking-widest text-center text-green-400 mt-3";
             } else {
                 startBtn.disabled = true;
                 startWarn.textContent = "Mínimo 3 jugadores necesarios";
-                startWarn.classList.remove('text-green-400');
-                startWarn.classList.add('text-red-400');
+                startWarn.className = "text-xs font-bold uppercase tracking-widest text-center text-red-400 mt-3";
             }
         });
 
-        socket.on('errorMsg', (msg) => { alert(msg); });
-
-        // Start Game
+        // ─── START GAME ──────────────────────────────────────────────────────
         document.getElementById('start-btn').addEventListener('click', () => {
-            const giveHint = document.getElementById('hint-toggle').checked;
-            const numImpostors = parseInt(document.getElementById('num-impostors').value) || 1;
-            const hasJester = document.getElementById('jester-toggle').checked;
-            const hasTwins = document.getElementById('twins-toggle').checked;
-            const isTabooMode = document.getElementById('taboo-toggle').checked;
-            
-            socket.emit('startGame', { giveHint, numImpostors, hasJester, hasTwins, isTabooMode });
+            socket.emit('startGame', {
+                giveHint:     document.getElementById('hint-toggle').checked,
+                numImpostors: parseInt(document.getElementById('num-impostors').value) || 1,
+                hasJester:    document.getElementById('jester-toggle').checked,
+                hasTwins:     document.getElementById('twins-toggle').checked,
+                isTabooMode:  document.getElementById('taboo-toggle').checked
+            });
         });
 
         socket.on('gameStarted', (data) => {
+            alivePlayers = (data.players || []).filter(p => !p.eliminated).length;
             document.getElementById('category-display').textContent = data.category;
-            
             secondsRemaining = 300;
             updateTimer();
             if(timerInterval) clearInterval(timerInterval);
@@ -365,13 +345,12 @@
                 secondsRemaining--;
                 updateTimer();
                 if(secondsRemaining <= 0) {
+                    clearInterval(timerInterval);
                     socket.emit('endGame');
-                    showResultsScreen("¡Tiempo Agotado!");
                 }
             }, 1000);
-            
-            // If host is playing, prepare the secret role box
-            if (iAmPlaying) {
+
+            if(iAmPlaying) {
                 document.getElementById('host-secret-role').classList.remove('hidden');
                 document.getElementById('host-role-content').classList.add('blur-[10px]');
                 document.getElementById('host-role-trigger').style.opacity = '1';
@@ -379,18 +358,17 @@
             } else {
                 document.getElementById('host-secret-role').classList.add('hidden');
             }
-
             showScreen('game');
         });
 
-        // Escuchar el evento receiveRole si el host también está jugando
+        // ─── HOST ROL (si juega) ─────────────────────────────────────────────
         socket.on('receiveRole', (roleData) => {
+            if(!iAmPlaying) return;
             const content = document.getElementById('host-role-content');
-            
             if (roleData.isImpostor) {
-                content.innerHTML = `<h3 class="text-red-400 font-bold mb-1">¡ERES EL IMPOSTOR!</h3><p class="text-sm text-gray-300">Finge que sabes.</p>`;
+                content.innerHTML = `<h3 class="text-red-400 font-bold mb-1">¡ERES EL IMPOSTOR!</h3><p class="text-sm text-gray-300">Finge que sabes la palabra.</p>`;
             } else if (roleData.isJester) {
-                content.innerHTML = `<h3 class="text-purple-400 font-bold mb-1">¡ERES EL BUFÓN!</h3><p class="text-sm text-gray-300">Haz que sospechen.</p><p class="text-white font-bold mt-2">${roleData.word}</p>`;
+                content.innerHTML = `<h3 class="text-purple-400 font-bold mb-1">¡ERES EL BUFÓN!</h3><p class="text-sm text-gray-300">Haz que sospechen de ti.</p><p class="text-white font-bold mt-2">${roleData.word}</p>`;
             } else if (roleData.isTwin) {
                 content.innerHTML = `<h3 class="text-pink-400 font-bold mb-1">GEMELO INOCENTE</h3><p class="text-white font-bold text-lg mt-1">${roleData.word}</p><p class="text-xs text-pink-300 mt-2">Aliado: ${roleData.otherTwinName}</p>`;
             } else {
@@ -398,33 +376,22 @@
             }
         });
 
-        // Interacciones para desvelar el rol del host
-        const trigger = document.getElementById('host-role-trigger');
+        const trigger  = document.getElementById('host-role-trigger');
         const rContent = document.getElementById('host-role-content');
-        
-        function revealHost() {
-            trigger.style.opacity = '0';
-            trigger.style.pointerEvents = 'none';
-            rContent.classList.remove('blur-[10px]');
-        }
-        function hideHost() {
-            trigger.style.opacity = '1';
-            trigger.style.pointerEvents = 'auto';
-            rContent.classList.add('blur-[10px]');
-        }
-        
+        function revealHost() { trigger.style.opacity = '0'; trigger.style.pointerEvents = 'none'; rContent.classList.remove('blur-[10px]'); }
+        function hideHost()   { trigger.style.opacity = '1'; trigger.style.pointerEvents = 'auto'; rContent.classList.add('blur-[10px]'); }
         trigger.addEventListener('mousedown', revealHost);
-        document.getElementById('host-secret-role').addEventListener('mouseup', hideHost);
-        document.getElementById('host-secret-role').addEventListener('mouseleave', hideHost);
+        trigger.addEventListener('mouseup', hideHost);
+        trigger.addEventListener('mouseleave', hideHost);
         trigger.addEventListener('touchstart', (e) => { e.preventDefault(); revealHost(); });
-        document.getElementById('host-secret-role').addEventListener('touchend', (e) => { e.preventDefault(); hideHost(); });
+        trigger.addEventListener('touchend',   (e) => { e.preventDefault(); hideHost(); });
 
-
+        // ─── TIMER ───────────────────────────────────────────────────────────
         function updateTimer() {
             const mins = Math.floor(secondsRemaining / 60);
             const secs = secondsRemaining % 60;
             const display = document.getElementById('timer-display');
-            display.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            display.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
             if(secondsRemaining <= 60 && secondsRemaining > 0) {
                 display.classList.add('text-red-500', 'animate-pulse');
                 display.classList.remove('text-white');
@@ -435,21 +402,19 @@
         }
 
         document.getElementById('end-game-btn').addEventListener('click', () => {
+            if(timerInterval) clearInterval(timerInterval);
             socket.emit('endGame');
-            showResultsScreen("Votación Anticipada");
+            showResultsScreen();
         });
 
-        function showResultsScreen(titleText) {
+        // ─── PANTALLA DE RESULTADOS ───────────────────────────────────────────
+        function showResultsScreen() {
             if(timerInterval) clearInterval(timerInterval);
-            document.getElementById('results-title').textContent = titleText;
+            document.getElementById('vote-counter-badge').className =
+                'inline-block bg-blue-900/50 border border-blue-500/50 text-blue-200 px-6 py-2 rounded-full font-bold mb-10 text-lg shadow-[0_0_15px_rgba(59,130,246,0.3)] min-w-[200px] transition';
+            document.getElementById('vote-counter-badge').innerHTML =
+                `<i class="fas fa-vote-yea mr-2"></i>Votos: <span id="votes-current">0</span> / <span id="votes-max">${alivePlayers}</span>`;
             document.getElementById('vote-counter-badge').classList.remove('hidden');
-            document.getElementById('votes-current').textContent = "0";
-            document.getElementById('votes-max').textContent = connectedPlayers;
-            
-            // Restablecer el panel de voto en caso de que juegue el host
-            document.getElementById('host-voting-panel').classList.add('hidden');
-            document.getElementById('host-voting-panel').innerHTML = `
-                <p class="text-indigo-400 font-bold uppercase tracking-widest text-sm mb-4"><i class="fas fa-user-secret mr-2"></i>Tu Voto (Anfitrión)</p>
                 <div id="host-voting-list" class="flex flex-wrap justify-center gap-3"></div>
             `;
             
