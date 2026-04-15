@@ -320,7 +320,6 @@
                 document.getElementById('host-secret-role').classList.remove('hidden');
                 document.getElementById('host-role-content').classList.add('blur-[10px]');
                 document.getElementById('host-role-trigger').style.opacity = '1';
-                document.getElementById('host-role-trigger').style.pointerEvents = 'auto';
             } else {
                 document.getElementById('host-secret-role').classList.add('hidden');
             }
@@ -331,16 +330,37 @@
         socket.on('receiveRole', (rd) => {
             if (!iAmPlaying) return;
             const c = document.getElementById('host-role-content');
-            if      (rd.isImpostor) c.innerHTML = `<h3 class="text-red-400 font-bold mb-1">¡ERES EL IMPOSTOR!</h3><p class="text-sm text-gray-300">Finge que sabes la palabra.</p>`;
-            else if (rd.isJester)   c.innerHTML = `<h3 class="text-purple-400 font-bold mb-1">¡ERES EL BUFÓN!</h3><p class="text-sm text-gray-300">Haz que sospechen de ti.</p><p class="text-white font-bold mt-2">${rd.word}</p>`;
-            else if (rd.isTwin)     c.innerHTML = `<h3 class="text-pink-400 font-bold mb-1">GEMELO INOCENTE</h3><p class="text-white font-bold text-lg mt-1">${rd.word}</p><p class="text-xs text-pink-300 mt-2">Aliado: ${rd.otherTwinName}</p>`;
-            else                    c.innerHTML = `<h3 class="text-blue-400 font-bold mb-1">CIUDADANO</h3><p class="text-xs text-gray-400 mb-1">La palabra es:</p><p class="text-white font-bold text-xl">${rd.word}</p>`;
+            if (rd.isImpostor) {
+                c.innerHTML = `
+                    <h3 class="text-red-500 font-black text-2xl mb-1">¡ERES EL IMPOSTOR!</h3>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest mb-3">No sabes la palabra</p>
+                    ${rd.hasHint ? `<div class="bg-red-500/20 px-3 py-1 rounded-lg text-red-200 text-sm font-bold">Pista: ${rd.category}</div>` : ''}
+                `;
+            } else if (rd.isJester) {
+                c.innerHTML = `
+                    <h3 class="text-purple-400 font-extrabold text-xl mb-1">¡ERES EL BUFÓN!</h3>
+                    <p class="text-xs text-gray-400 mb-2 uppercase">Palabra Secreta:</p>
+                    <p class="text-white font-black text-2xl tracking-tighter">${rd.word}</p>
+                `;
+            } else if (rd.isTwin) {
+                c.innerHTML = `
+                    <h3 class="text-pink-400 font-extrabold text-xl mb-1">GEMELO INOCENTE</h3>
+                    <p class="text-white font-black text-2xl mb-1">${rd.word}</p>
+                    <p class="text-xs text-pink-300 font-bold uppercase tracking-wider">Compañero: ${rd.otherTwinName}</p>
+                `;
+            } else {
+                c.innerHTML = `
+                    <h3 class="text-blue-400 font-extrabold text-xl mb-1">CIUDADANO</h3>
+                    <p class="text-xs text-gray-400 mb-1 uppercase">La palabra es:</p>
+                    <p class="text-white font-black text-3xl tracking-tight">${rd.word}</p>
+                `;
+            }
         });
 
         const trigger  = document.getElementById('host-role-trigger');
         const rContent = document.getElementById('host-role-content');
-        function revealHost() { trigger.style.opacity = '0'; trigger.style.pointerEvents = 'none'; rContent.classList.remove('blur-[10px]'); }
-        function hideHost()   { trigger.style.opacity = '1'; trigger.style.pointerEvents = 'auto'; rContent.classList.add('blur-[10px]'); }
+        function revealHost() { trigger.style.opacity = '0'; rContent.classList.remove('blur-[10px]'); }
+        function hideHost()   { trigger.style.opacity = '1'; rContent.classList.add('blur-[10px]'); }
         trigger.addEventListener('mousedown',  revealHost);
         trigger.addEventListener('mouseup',    hideHost);
         trigger.addEventListener('mouseleave', hideHost);
