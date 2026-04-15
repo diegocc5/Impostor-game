@@ -195,13 +195,17 @@ io.on('connection', (socket) => {
 
     // Jugador se une a la sala
     socket.on('joinRoom', (data, callback) => {
-        const { playerName, roomCode } = data;
+        const { playerName, roomCode } = data || {};
         
         if (roomCode !== roomState.roomCode) {
             return callback({ success: false, message: 'Código de sala incorrecto.' });
         }
-        if (roomState.status !== 'lobby' && !roomState.players.find(p => p.name.toLowerCase() === playerName.toLowerCase())) {
-            return callback({ success: false, message: 'La partida ya ha comenzado.' });
+
+        const isExisting = roomState.players.some(p => p.name.toLowerCase() === playerName.toLowerCase());
+        const canJoinNew = ['lobby', 'results'].includes(roomState.status);
+
+        if (!canJoinNew && !isExisting) {
+            return callback({ success: false, message: 'La partida está en curso. Espera al siguiente lobby.' });
         }
 
         // Check if player with same name already exists (reconnection)

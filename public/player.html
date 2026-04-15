@@ -162,34 +162,20 @@
         const savedRoom = localStorage.getItem('lastRoomCode') || '';
         if (savedRoom) {
             document.getElementById('room-code').value = savedRoom;
-            if (roomCodeFromUrl) {
-                document.getElementById('room-code-container').classList.add('hidden');
-                document.getElementById('auto-room-badge').classList.remove('hidden');
-            }
         }
 
-        // Auto-join if possible
-        function attemptAutoJoin() {
-            const name = localStorage.getItem('playerName');
-            const code = localStorage.getItem('lastRoomCode');
-            if (name && code && socket.connected) {
-                socket.emit('joinRoom', { playerName: name, roomCode: code }, (res) => {
-                    if (res.success) {
-                        console.log("Auto-unido con éxito");
-                        // Si ya está en una partida, el servidor enviará los eventos correspondientes
-                    }
-                });
-            }
+        const savedName = localStorage.getItem('playerName') || '';
+        if (savedName) {
+            document.getElementById('player-name').value = savedName;
         }
 
-        socket.on('connect', () => {
-            attemptAutoJoin();
-        });
-
-        if(myName) document.getElementById('player-name').value = myName;
+        if (roomCodeFromUrl) {
+            document.getElementById('room-code-container').classList.add('hidden');
+            document.getElementById('auto-room-badge').classList.remove('hidden');
+        }
 
         document.getElementById('join-btn').addEventListener('click', () => {
-            const roomCode = roomParam || document.getElementById('room-code').value.trim().toUpperCase();
+            const roomCode = document.getElementById('room-code').value.trim().toUpperCase();
             const playerName = document.getElementById('player-name').value.trim();
             const errorP = document.getElementById('join-error');
 
