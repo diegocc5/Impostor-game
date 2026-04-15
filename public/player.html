@@ -136,6 +136,8 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
+        let myName = localStorage.getItem('playerName') || '';
+        let amEliminated = false;
 
         const screens = {
             join: document.getElementById('player-join'),
@@ -146,45 +148,33 @@
         };
 
         function showScreen(name) {
-            for(let key in screens) {
-                screens[key].classList.add('hidden');
-                screens[key].classList.remove('animate-[fadeIn_0.5s_ease-out]');
-            }
-            screens[name].classList.remove('hidden');
-            // Trigger tailwind animation via arbitrary class doesn't always reflow, so we just unhide
+            for(let key in screens) screens[key].classList.add('hidden');
+            if(screens[name]) screens[name].classList.remove('hidden');
         }
 
         // Auto-fill Room Code
         const urlParams = new URLSearchParams(window.location.search);
         const roomParam = urlParams.get('room');
         if (roomParam) {
-            const roomInput = document.getElementById('room-code');
-            roomInput.value = roomParam;
+            document.getElementById('room-code').value = roomParam;
             document.getElementById('room-code-container').classList.add('hidden');
             document.getElementById('auto-room-badge').classList.remove('hidden');
         }
 
+        if(myName) document.getElementById('player-name').value = myName;
+
         document.getElementById('join-btn').addEventListener('click', () => {
-            const roomInputVal = document.getElementById('room-code').value.trim().toUpperCase();
-            const roomCode = roomParam || roomInputVal;
+            const roomCode = roomParam || document.getElementById('room-code').value.trim().toUpperCase();
             const playerName = document.getElementById('player-name').value.trim();
             const errorP = document.getElementById('join-error');
 
-            if (!roomCode || roomCode.length < 4) {
-                errorP.innerHTML = "<i class='fas fa-exclamation-circle mr-1'></i> Código incorrecto.";
-                errorP.classList.remove('hidden');
-                return;
-            }
-            if (!playerName) {
-                errorP.innerHTML = "<i class='fas fa-exclamation-circle mr-1'></i> Ingresa tu nombre.";
-                errorP.classList.remove('hidden');
-                return;
-            }
+            if (!roomCode || roomCode.length < 4) { errorP.innerHTML = "<i class='fas fa-exclamation-circle mr-1'></i> Código incorrecto."; errorP.classList.remove('hidden'); return; }
+            if (!playerName) { errorP.innerHTML = "<i class='fas fa-exclamation-circle mr-1'></i> Ingresa tu nombre."; errorP.classList.remove('hidden'); return; }
 
+            myName = playerName;
             localStorage.setItem('playerName', playerName);
             errorP.classList.add('hidden');
             
-            // Boton cargando
             const btn = document.getElementById('join-btn');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin text-2xl"></i>';
@@ -193,7 +183,6 @@
             socket.emit('joinRoom', { playerName, roomCode }, (response) => {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
-                
                 if (response.success) {
                     showScreen('waiting');
                 } else {
@@ -203,183 +192,148 @@
             });
         });
 
-        // Load cached name
-        if(localStorage.getItem('playerName')) {
-            document.getElementById('player-name').value = localStorage.getItem('playerName');
-        }
-
+        // --- RECIBIR ROL ---
         socket.on('receiveRole', (roleData) => {
+            amEliminated = false;
             const content = document.getElementById('role-content');
             
             let tabooHtml = '';
             if (roleData.isTabooMode && roleData.taboos) {
                 if (roleData.isImpostor && !roleData.hasHint) {
-                    tabooHtml = `<div class="mt-5 w-full p-4 bg-red-950/50 border border-red-500/50 rounded-2xl text-left backdrop-blur-md"><p class="font-bold text-red-400 text-sm tracking-wide">💣 TABÚ ACTIVO (CIEGAS):</p><p class="text-gray-300 mt-1 text-sm font-medium">Hay palabras prohibidas, pero no sabes cuáles son.</p></div>`;
+                    tabooHtml = `<div class="mt-5 w-full p-4 bg-red-950/50 border border-red-500/50 rounded-2xl text-left"><p class="font-bold text-red-400 text-sm">💣 TABÚ ACTIVO (CIEGAS)</p><p class="text-gray-300 mt-1 text-sm">Hay palabras prohibidas, pero no sabes cuáles.</p></div>`;
                 } else if (roleData.isImpostor) {
-                    tabooHtml = `<div class="mt-5 w-full p-4 bg-green-900/30 border border-green-500/50 rounded-2xl text-left backdrop-blur-md"><p class="font-bold text-green-400 text-sm tracking-wide">🤫 VENTAJA TABÚ:</p><p class="text-gray-300 mt-1 text-sm font-medium">Di estas palabras para parecer inocente: <span class="text-white font-bold">${roleData.taboos.join(", ")}</span>.</p></div>`;
+                    tabooHtml = `<div class="mt-5 w-full p-4 bg-green-900/30 border border-green-500/50 rounded-2xl text-left"><p class="font-bold text-green-400 text-sm">🤫 VENTAJA TABÚ:</p><p class="text-gray-300 mt-1 text-sm">Di estas para parecer inocente: <span class="text-white font-bold">${roleData.taboos.join(", ")}</span>.</p></div>`;
                 } else {
-                    tabooHtml = `<div class="mt-5 w-full p-4 bg-red-950/70 border border-red-500/50 rounded-2xl text-left backdrop-blur-md shadow-inner"><p class="font-bold text-red-400 text-sm tracking-wide">🚫 LISTA NEGRA TABÚ:</p><p class="text-gray-300 mt-1 text-sm font-medium">Prohibidísimo decir: <br><span class="text-white text-base font-bold tracking-wide">${roleData.taboos.join(", ")}</span>.</p></div>`;
+                    tabooHtml = `<div class="mt-5 w-full p-4 bg-red-950/70 border border-red-500/50 rounded-2xl text-left"><p class="font-bold text-red-400 text-sm">🚫 LISTA NEGRA TABÚ:</p><p class="text-gray-300 mt-1 text-sm">Prohibidísimo decir: <span class="text-white font-bold">${roleData.taboos.join(", ")}</span>.</p></div>`;
                 }
             }
 
             if (roleData.isImpostor) {
-                let hintHtml = '';
-                if (roleData.hasHint) {
-                    hintHtml = `<div class="mt-6 p-4 bg-black/40 rounded-2xl border border-white/5 w-full"><p class="text-gray-400 text-sm font-bold uppercase tracking-widest mb-1">Categoría</p><p class="text-2xl font-black text-yellow-400">${roleData.category}</p></div>`;
-                } else {
-                    hintHtml = `<div class="mt-6 p-3 bg-red-900/20 border border-red-500/30 rounded-xl text-red-300 text-sm font-bold"><i class="fas fa-eye-slash mr-2"></i>Cero pistas. ¡Sobrevive!</div>`;
-                }
-
+                let hintHtml = roleData.hasHint
+                    ? `<div class="mt-6 p-4 bg-black/40 rounded-2xl border border-white/5 w-full"><p class="text-gray-400 text-sm font-bold uppercase tracking-widest mb-1">Categoría</p><p class="text-2xl font-black text-yellow-400">${roleData.category}</p></div>`
+                    : `<div class="mt-6 p-3 bg-red-900/20 border border-red-500/30 rounded-xl text-red-300 text-sm font-bold"><i class="fas fa-eye-slash mr-2"></i>Cero pistas. ¡Sobrevive!</div>`;
                 content.innerHTML = `
-                    <div class="h-20 w-20 rounded-full bg-red-500/20 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(239,68,68,0.5)] border border-red-500/40">
-                        <i class="fas fa-user-ninja text-4xl text-red-500"></i>
-                    </div>
+                    <div class="h-20 w-20 rounded-full bg-red-500/20 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(239,68,68,0.5)] border border-red-500/40"><i class="fas fa-user-ninja text-4xl text-red-500"></i></div>
                     <h2 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-red-400 to-red-600 mb-2 drop-shadow">IMPOSTOR</h2>
                     <p class="text-gray-400 font-medium text-sm">Escucha y mimetízate con ellos.</p>
-                    ${hintHtml}
-                    ${tabooHtml}
-                `;
+                    ${hintHtml}${tabooHtml}`;
             } else if (roleData.isJester) {
                 content.innerHTML = `
-                    <div class="h-20 w-20 rounded-full bg-purple-500/20 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(168,85,247,0.5)] border border-purple-500/40">
-                        <i class="fas fa-hat-wizard text-4xl text-purple-400"></i>
-                    </div>
+                    <div class="h-20 w-20 rounded-full bg-purple-500/20 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(168,85,247,0.5)] border border-purple-500/40"><i class="fas fa-hat-wizard text-4xl text-purple-400"></i></div>
                     <h2 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-purple-400 to-pink-500 mb-6 drop-shadow">EL BUFÓN</h2>
-                    <div id="role-image-container" class="mb-6 mx-auto w-32 h-32 rounded-2xl overflow-hidden border-2 border-white/20 shadow-2xl bg-black/20 flex items-center justify-center">
-                        <img id="role-image" src="" alt="" class="w-full h-full object-cover hidden">
-                        <div id="role-image-loader" class="text-white/20"><i class="fas fa-image text-4xl animate-pulse"></i></div>
+                    <div id="role-image-container" class="mb-6 mx-auto w-32 h-32 rounded-2xl overflow-hidden border-2 border-white/20 bg-black/20 flex items-center justify-center">
+                        <img id="role-image" src="" alt="" class="w-full h-full object-cover hidden"><div id="role-image-loader"><i class="fas fa-image text-4xl text-white/20 animate-pulse"></i></div>
                     </div>
-                    <div class="bg-black/40 w-full p-5 rounded-2xl border border-white/10 shadow-inner mb-4">
+                    <div class="bg-black/40 w-full p-5 rounded-2xl border border-white/10 mb-4">
                         <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Palabra Secreta</p>
-                        <p class="text-3xl font-black text-white mb-2">${roleData.word}</p>
-                        <div class="w-12 h-1 bg-white/10 mx-auto my-3 rounded"></div>
-                        <p class="text-xs text-yellow-400 font-bold uppercase tracking-wider">${roleData.category}</p>
+                        <p class="text-3xl font-black text-white mb-1">${roleData.word}</p>
+                        <p class="text-xs text-yellow-400 font-bold uppercase">${roleData.category}</p>
                     </div>
-                    <p class="text-sm font-medium text-purple-200 bg-purple-900/40 border border-purple-500/30 p-3 rounded-xl w-full">Tu objetivo es <span class="font-bold text-white">hacer que sospechen de ti</span> y te voten. ¡Si te echan, ganas tú solo!</p>
-                    ${tabooHtml}
-                `;
+                    <p class="text-sm font-medium text-purple-200 bg-purple-900/40 border border-purple-500/30 p-3 rounded-xl w-full">Tu objetivo es <span class="font-bold text-white">hacer que sospechen de ti</span>. ¡Si te echan, ganas!</p>
+                    ${tabooHtml}`;
                 fetchImage(roleData.word, roleData.category);
             } else if (roleData.isTwin) {
                 content.innerHTML = `
-                    <div class="h-20 w-20 rounded-full bg-pink-500/20 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(236,72,153,0.5)] border border-pink-500/40">
-                        <i class="fas fa-gem text-4xl text-pink-400"></i>
-                    </div>
+                    <div class="h-20 w-20 rounded-full bg-pink-500/20 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(236,72,153,0.5)] border border-pink-500/40"><i class="fas fa-gem text-4xl text-pink-400"></i></div>
                     <h2 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-pink-400 to-rose-400 mb-6 drop-shadow">GEMELOS</h2>
-                    <div class="bg-black/40 w-full p-5 rounded-2xl border border-white/10 shadow-inner mb-4">
+                    <div class="bg-black/40 w-full p-5 rounded-2xl border border-white/10 mb-4">
                         <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Palabra Secreta</p>
                         <p class="text-3xl font-black text-white mb-1">${roleData.word}</p>
                     </div>
-                    <div class="w-full bg-pink-950/40 p-4 border border-pink-500/30 rounded-xl text-left flex items-center">
+                    <div class="w-full bg-pink-950/40 p-4 border border-pink-500/30 rounded-xl flex items-center">
                         <div class="bg-pink-500/20 p-3 rounded-full mr-4"><i class="fas fa-handshake text-pink-300"></i></div>
-                        <div>
-                            <p class="text-xs text-pink-300 font-bold uppercase tracking-wide">Compañero Inocente:</p>
-                            <p class="text-xl font-black text-white">${roleData.otherTwinName}</p>
-                        </div>
+                        <div><p class="text-xs text-pink-300 font-bold uppercase">Compañero Inocente:</p><p class="text-xl font-black text-white">${roleData.otherTwinName}</p></div>
                     </div>
-                    ${tabooHtml}
-                `;
+                    ${tabooHtml}`;
             } else {
                 content.innerHTML = `
-                    <div class="h-20 w-20 rounded-full bg-blue-500/20 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(59,130,246,0.5)] border border-blue-500/40">
-                        <i class="fas fa-shield-alt text-4xl text-blue-400"></i>
-                    </div>
+                    <div class="h-20 w-20 rounded-full bg-blue-500/20 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(59,130,246,0.5)] border border-blue-500/40"><i class="fas fa-shield-alt text-4xl text-blue-400"></i></div>
                     <h2 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-blue-300 to-cyan-500 mb-6 drop-shadow">CIUDADANO</h2>
-                    <div id="role-image-container" class="mb-6 mx-auto w-32 h-32 rounded-2xl overflow-hidden border-2 border-white/20 shadow-2xl bg-black/20 flex items-center justify-center">
-                        <img id="role-image" src="" alt="" class="w-full h-full object-cover hidden">
-                        <div id="role-image-loader" class="text-white/20"><i class="fas fa-image text-4xl animate-pulse"></i></div>
+                    <div id="role-image-container" class="mb-6 mx-auto w-32 h-32 rounded-2xl overflow-hidden border-2 border-white/20 bg-black/20 flex items-center justify-center">
+                        <img id="role-image" src="" alt="" class="w-full h-full object-cover hidden"><div id="role-image-loader"><i class="fas fa-image text-4xl text-white/20 animate-pulse"></i></div>
                     </div>
-                    <div class="bg-black/40 w-full p-6 rounded-2xl border border-white/10 shadow-inner mb-2">
+                    <div class="bg-black/40 w-full p-6 rounded-2xl border border-white/10 mb-2">
                         <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2">Palabra Secreta</p>
                         <p class="text-4xl font-black text-white mb-5 break-words tracking-tight">${roleData.word}</p>
                         <div class="border-t border-white/10 w-full mb-4"></div>
-                        <p class="text-xs font-medium text-gray-400 uppercase tracking-widest flex items-center justify-center"><i class="fas fa-tag mr-2 text-gray-600"></i> <span class="text-yellow-400 font-bold ml-1">${roleData.category}</span></p>
+                        <p class="text-xs font-medium text-gray-400 uppercase tracking-widest"><i class="fas fa-tag mr-2 text-gray-600"></i><span class="text-yellow-400 font-bold">${roleData.category}</span></p>
                     </div>
-                    ${tabooHtml}
-                `;
+                    ${tabooHtml}`;
                 fetchImage(roleData.word, roleData.category);
             }
 
-            // Restore Overlay
+            // Reponer overlay y mostrar pantalla de rol
             tapOverlay.style.opacity = '1';
             tapOverlay.style.pointerEvents = 'auto';
             roleContent.classList.add('reveal-blur');
             showScreen('role');
         });
 
+        // --- IMAGEN ---
         async function fetchImage(word, category) {
+            // Espera un tick para que el DOM esté listo
+            await new Promise(r => setTimeout(r, 100));
             const imgEl = document.getElementById('role-image');
             const loader = document.getElementById('role-image-loader');
-            if(!imgEl) return;
-            
+            if (!imgEl) return;
             try {
                 const res = await fetch(`https://es.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(word)}`);
                 const data = await res.json();
-                if(data.originalimage) {
-                    imgEl.src = data.originalimage.source;
-                    imgEl.classList.remove('hidden');
-                    loader.classList.add('hidden');
-                } else {
-                    imgEl.src = `https://loremflickr.com/320/320/${encodeURIComponent(word)}`;
-                    imgEl.classList.remove('hidden');
-                    loader.classList.add('hidden');
-                }
+                const src = data.originalimage?.source || `https://loremflickr.com/320/320/${encodeURIComponent(word)}`;
+                imgEl.src = src;
+                imgEl.onload = () => { imgEl.classList.remove('hidden'); if(loader) loader.classList.add('hidden'); };
+                imgEl.onerror = () => { imgEl.src = `https://loremflickr.com/320/320/${encodeURIComponent(category)}`; imgEl.classList.remove('hidden'); if(loader) loader.classList.add('hidden'); };
             } catch(e) {
                 imgEl.src = `https://loremflickr.com/320/320/${encodeURIComponent(category)}`;
                 imgEl.classList.remove('hidden');
-                loader.classList.add('hidden');
+                if(loader) loader.classList.add('hidden');
             }
         }
 
         const tapOverlay = document.getElementById('tap-to-reveal');
         const roleContent = document.getElementById('role-content');
-        
-        function reveal() {
-            tapOverlay.style.opacity = '0';
-            roleContent.classList.remove('reveal-blur');
-        }
-        function hide() {
-            tapOverlay.style.opacity = '1';
-            roleContent.classList.add('reveal-blur');
-        }
+
+        function reveal() { tapOverlay.style.opacity = '0'; roleContent.classList.remove('reveal-blur'); }
+        function hide()   { tapOverlay.style.opacity = '1'; roleContent.classList.add('reveal-blur'); }
 
         tapOverlay.addEventListener('touchstart', (e) => { e.preventDefault(); reveal(); });
-        tapOverlay.addEventListener('touchend', (e) => { e.preventDefault(); hide(); });
-        tapOverlay.addEventListener('mousedown', () => { reveal(); });
-        tapOverlay.addEventListener('mouseup', () => { hide(); });
-        tapOverlay.addEventListener('mouseleave', () => { hide(); });
+        tapOverlay.addEventListener('touchend',   (e) => { e.preventDefault(); hide(); });
+        tapOverlay.addEventListener('mousedown', reveal);
+        tapOverlay.addEventListener('mouseup', hide);
+        tapOverlay.addEventListener('mouseleave', hide);
 
+        // --- SIGUIENTE RONDA ---
         socket.on('gameStarted', (data) => {
-            // El servidor envía la lista de jugadores, buscamos si estamos eliminados
-            const me = data.players.find(p => p.name === localStorage.getItem('playerName'));
-            if (me && me.eliminated) {
-                // Si ya estamos eliminados de una ronda anterior, nos quedamos en modo fantasma
+            if (amEliminated) {
+                // Pantalla de espectador para eliminados
                 showScreen('results');
                 document.getElementById('mobile-reveal').classList.add('hidden');
+                document.querySelector('#player-results h2').textContent = '☠️ Estás Eliminado';
+                document.querySelector('#player-results p').textContent = 'Observa en silencio mientras los demás votan.';
             } else {
-                showScreen('waiting'); // Esperamos a receiveRole
+                showScreen('waiting');
             }
         });
 
+        // --- VOTACIÓN ---
         socket.on('startVoting', (data) => {
-            // Verificar si el jugador actual está vivo en esta ronda
-            socket.emit('checkStatus', (status) => {
-                if (status && status.eliminated) {
-                    showScreen('results');
-                    document.getElementById('results-title').textContent = "Estás Eliminado";
-                } else {
-                    renderVotingList(data);
-                }
-            });
-        });
+            if (amEliminated) {
+                // El servidor ya filtra a los eliminados del array de voters,
+                // pero por si acaso, si ya sé que estoy eliminado no voto.
+                showScreen('results');
+                document.querySelector('#player-results h2').textContent = '☠️ Estás Eliminado';
+                document.querySelector('#player-results p').textContent = 'Observa en silencio.';
+                return;
+            }
 
-        function renderVotingList(data) {
             const list = document.getElementById('voting-list');
             list.innerHTML = '';
             document.getElementById('vote-wait').classList.add('hidden');
             list.classList.remove('hidden');
 
+            // data.players es un array de strings (nombres vivos)
             data.players.forEach(p => {
-                if(p === localStorage.getItem('playerName')) return;
+                if (p === myName) return; // No votar a uno mismo
                 const btn = document.createElement('button');
                 btn.className = 'w-full bg-black/40 hover:bg-red-900/50 text-white font-bold py-4 px-6 rounded-xl border border-white/10 transition flex items-center justify-between group';
                 btn.innerHTML = `<span>${p}</span> <i class="fas fa-gavel text-gray-600 group-hover:text-red-400 transition"></i>`;
@@ -391,35 +345,37 @@
                 list.appendChild(btn);
             });
             showScreen('voting');
-        }
+        });
 
+        // --- RESULTADO ---
         socket.on('impostorRevealed', (data) => {
+            // Actualizar estado local de eliminación
+            const meInResults = (data.players || []).find(p => p.name === myName);
+            if (meInResults && meInResults.eliminated) amEliminated = true;
+
             showScreen('results');
             const mobileRev = document.getElementById('mobile-reveal');
             const nameEl = document.getElementById('revealed-name');
             const wordEl = document.getElementById('revealed-word');
-            
             mobileRev.classList.remove('hidden');
             nameEl.textContent = data.eliminatedName;
             wordEl.textContent = data.word;
+            nameEl.className = data.isImpostor
+                ? "text-3xl font-black text-green-500 animate-bounce"
+                : "text-3xl font-black text-red-500";
 
-            // Cambiar color según si era impostor o no
-            if (data.isImpostor) {
-                nameEl.className = "text-3xl font-black text-green-500 animate-bounce";
-            } else {
-                nameEl.className = "text-3xl font-black text-red-500";
-            }
-            
+            const resultsTitle = document.querySelector('#player-results h2');
             if (data.gameEnded) {
-                // Si el juego termina, mostramos quién ha ganado
-                document.getElementById('results-title').textContent = "¡FIN DE PARTIDA!";
+                const winMsg = { citizens: '🎉 ¡Ciudadanos Ganan!', impostors: '👺 ¡Impostores Ganan!', jester: '🃏 ¡El Bufón Gana!' };
+                resultsTitle.textContent = winMsg[data.winnerRole] || '¡Fin de Partida!';
+            } else {
+                resultsTitle.textContent = 'Resultado del Voto';
             }
         });
 
-        socket.on('returnToLobby', () => {
-            location.reload(); // Recarga limpia
-        });
+        socket.on('returnToLobby', () => { location.reload(); });
 
     </script>
+
 </body>
 </html>
