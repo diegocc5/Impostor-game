@@ -250,6 +250,13 @@ io.on('connection', (socket) => {
         let jesterIndex = (settings.hasJester && indices.length > 0) ? pull() : null;
         let twinIndices = (settings.hasTwins && indices.length >= 2) ? [pull(), pull()] : [];
 
+        // Primero notificamos que el juego empieza (players van a waiting)
+        io.emit('gameStarted', { 
+            category: roomState.pickedWord.category,
+            players: roomState.players.map(p => ({ name: p.name, eliminated: false }))
+        });
+
+        // Después enviamos los roles individualmente (players transicionan a role screen)
         roomState.players.forEach((player, index) => {
             player.roleData = {
                 isImpostor: impostorIndices.includes(index),
@@ -263,11 +270,6 @@ io.on('connection', (socket) => {
                 hasHint: settings.giveHint
             };
             io.to(player.socketId).emit('receiveRole', player.roleData);
-        });
-
-        io.emit('gameStarted', { 
-            category: roomState.pickedWord.category,
-            players: roomState.players.map(p => ({ name: p.name, eliminated: false }))
         });
     });
 
