@@ -155,7 +155,8 @@ const WORD_BANK = {
         { word: "Toy Story", taboos: ["Juguetes", "Woody", "Buzz", "Amigo"] },
         { word: "Avengers", taboos: ["Marvel", "Héroes", "Thanos", "Vengadores"] },
         { word: "Avatar", taboos: ["Azul", "Planeta", "Pandora", "Cine"] }
-    ],i", "Gafas"] },
+    ],
+    "Influenciadores Extra": [
         { word: "Agustin51", taboos: ["Fortnite", "Sevilla", "Gritos", "Grefg"] },
         { word: "Ampeter", taboos: ["Fortnite", "Casa", "Moto", "Grefg"] }
     ]
