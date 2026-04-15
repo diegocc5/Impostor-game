@@ -355,14 +355,27 @@
 
             showScreen('results');
             const mobileRev = document.getElementById('mobile-reveal');
-            const nameEl = document.getElementById('revealed-name');
-            const wordEl = document.getElementById('revealed-word');
             mobileRev.classList.remove('hidden');
-            nameEl.textContent = data.eliminatedName;
-            wordEl.textContent = data.word;
-            nameEl.className = data.isImpostor
-                ? "text-3xl font-black text-green-500 animate-bounce"
-                : "text-3xl font-black text-red-500";
+
+            const statusLabel = data.isImpostor 
+                ? "🚀 ¡IMPOSTOR EYECTADO!" 
+                : (data.eliminatedRole === 'jester' ? "🃏 EL BUFÓN OS HA ENGAÑADO" : "❌ NO ERA EL IMPOSTOR");
+            
+            const roleName = {
+                'impostor': 'IMPOSTOR',
+                'jester': 'BUFÓN',
+                'twin': 'GEMELO',
+                'citizen': 'CIUDADANO'
+            }[data.eliminatedRole] || 'CIUDADANO';
+
+            mobileRev.innerHTML = `
+                <p class="text-xs font-bold ${data.isImpostor ? 'text-green-400' : 'text-red-400'} uppercase tracking-widest mb-1">${statusLabel}</p>
+                <p class="text-3xl font-black ${data.isImpostor ? 'text-green-500 animate-bounce' : 'text-red-500'} drop-shadow-md mb-2">${data.eliminatedName}</p>
+                <p class="text-sm font-bold text-gray-500 uppercase italic mb-4">Rol: ${roleName}</p>
+                <div class="my-5 border-t border-white/10"></div>
+                <p class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-1">La palabra era:</p>
+                <p class="text-2xl font-bold text-yellow-400 drop-shadow-md">${data.word}</p>
+            `;
 
             const resultsTitle = document.querySelector('#player-results h2');
             if (data.gameEnded) {

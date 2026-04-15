@@ -377,6 +377,7 @@ io.on('connection', (socket) => {
         const revealData = {
             eliminatedName: expelledName,
             isImpostor: expelledPlayer ? expelledPlayer.roleData.isImpostor : false,
+            eliminatedRole: expelledPlayer ? expelledPlayer.roleData.role : 'ciudadano',
             word: roomState.pickedWord.word,
             category: roomState.pickedWord.category,
             gameEnded,
