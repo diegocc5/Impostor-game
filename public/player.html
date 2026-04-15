@@ -385,8 +385,13 @@
                 <p class="text-3xl font-black ${data.isImpostor ? 'text-green-500 animate-bounce' : 'text-red-500'} drop-shadow-md mb-2">${data.eliminatedName}</p>
                 <p class="text-sm font-bold text-gray-500 uppercase italic mb-4">Rol: ${roleName}</p>
                 <div class="my-5 border-t border-white/10"></div>
-                <p class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-1">La palabra era:</p>
-                <p class="text-2xl font-bold text-yellow-400 drop-shadow-md">${data.word}</p>
+                ${data.gameEnded ? `
+                    <p class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-1">La palabra era:</p>
+                    <p class="text-2xl font-bold text-yellow-400 drop-shadow-md">${data.word}</p>
+                ` : `
+                    <p class="text-xs font-bold text-yellow-500/50 uppercase tracking-widest">🤫 Palabra no revelada</p>
+                    <p class="text-[10px] text-gray-500">La partida sigue en curso...</p>
+                `}
             `;
 
             const resultsTitle = document.querySelector('#player-results h2');

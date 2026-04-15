@@ -471,8 +471,15 @@
                     <h3 class="text-5xl font-black text-white drop-shadow mb-3">${data.eliminatedName}</h3>
                     <p class="text-2xl font-black uppercase tracking-widest">${verdictText}</p>
                 </div>
-                <p class="text-gray-400 text-sm font-bold uppercase tracking-widest mb-2">La palabra secreta era:</p>
-                <p class="font-black text-6xl text-yellow-400 drop-shadow-2xl mb-8">${data.word}</p>`;
+                ${data.gameEnded ? `
+                    <p class="text-gray-400 text-sm font-bold uppercase tracking-widest mb-2">La palabra secreta era:</p>
+                    <p class="font-black text-6xl text-yellow-400 drop-shadow-2xl mb-8">${data.word}</p>
+                ` : `
+                    <div class="p-6 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl mb-8">
+                        <p class="text-yellow-500 font-bold uppercase tracking-widest text-sm">🤐 Palabra Bajo Secreto</p>
+                        <p class="text-gray-400 text-xs mt-1">La partida continúa. El impostor sigue oculto...</p>
+                    </div>
+                `}`;
 
             const eliminated = (data.players || []).filter(p => p.eliminated);
             if (eliminated.length > 0) {
