@@ -449,8 +449,14 @@
         socket.on('impostorRevealed', (data) => {
             alivePlayers = (data.players || []).filter(p => !p.eliminated).length;
             document.getElementById('vote-counter-badge').classList.add('hidden');
+            
+            // Ocultar imagen si la partida sigue
+            const imgContainer = document.getElementById('revealed-image-container');
+            if (imgContainer) imgContainer.classList.toggle('hidden', !data.gameEnded);
 
-            fetchRevealedImage(data.word, data.category);
+            if (data.gameEnded) {
+                fetchRevealedImage(data.word, data.category);
+            }
 
             const isJesterWin = data.winnerRole === 'jester';
             let verdictText, verdictStyle;
