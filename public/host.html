@@ -215,8 +215,15 @@
                 Desvelar Misterio <i class="fas fa-unlock ml-3"></i>
             </button>
 
-            <div id="reveal-details" class="hidden bg-black/60 p-8 rounded-3xl border border-white/10 mb-8 shadow-inner backdrop-blur-md max-w-2xl mx-auto">
-                <!-- Impostor inyectado aquí -->
+            <div id="reveal-details" class="hidden mt-10 animate-fade-in">
+                <!-- Imagen Revelada -->
+                <div id="revealed-image-container" class="hidden mb-10 mx-auto w-64 h-64 rounded-3xl overflow-hidden border-4 border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-black/20 animate-expand-in">
+                    <img id="revealed-image" src="" alt="" class="w-full h-full object-cover">
+                </div>
+                
+                <div id="reveal-text-content">
+                    <!-- Contenido inyectado por JS -->
+                </div>
             </div>
 
             <button id="restart-btn" class="hidden w-full max-w-md mx-auto bg-blue-600 hover:bg-blue-500 text-white font-black py-5 px-4 rounded-2xl shadow-[0_10px_20px_rgba(37,99,235,0.4)] flex items-center justify-center transition-all text-xl uppercase tracking-wider border border-white/10">
@@ -506,10 +513,38 @@
             document.getElementById('reveal-btn').classList.add('hidden');
         });
 
+        async function fetchRevealedImage(word, category) {
+            const container = document.getElementById('revealed-image-container');
+            const imgEl = document.getElementById('revealed-image');
+            container.classList.add('hidden');
+
+            let url = '';
+            if (['Famosos', 'Influencers', 'Países', 'Series y Películas'].includes(category)) {
+                try {
+                    const wikiUrl = `https://es.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(word)}`;
+                    const response = await fetch(wikiUrl);
+                    const data = await response.json();
+                    if (data.originalimage && data.originalimage.source) {
+                        url = data.originalimage.source;
+                    }
+                } catch (e) { console.log("Wiki error"); }
+            }
+
+            if (!url) {
+                url = `https://source.unsplash.com/featured/600x600/?${encodeURIComponent(word)}`;
+            }
+
+            imgEl.src = url;
+            imgEl.onload = () => {
+                container.classList.remove('hidden');
+            };
+        }
+
         socket.on('impostorRevealed', (data) => {
             document.getElementById('vote-counter-badge').classList.add('hidden');
+            fetchRevealedImage(data.word, data.category);
             
-            const details = document.getElementById('reveal-details');
+            const details = document.getElementById('reveal-text-content');
             const impostorsText = data.impostors.length > 1 ? "Los Impostores eran" : "El Impostor era";
             const impostorsNames = data.impostors.join(', ');
             
@@ -542,7 +577,7 @@
                 <div class="border-t border-white/10 my-6 mx-10"></div>
                 
                 <p class="text-gray-400 text-sm font-bold uppercase tracking-widest mb-2">La palabra secreta ha sido:</p>
-                <p class="font-black text-5xl text-yellow-400 drop-shadow">${data.word}</p>
+                <p class="font-black text-6xl text-yellow-400 drop-shadow-2xl animate-bounce-slow">${data.word}</p>
             `;
 
             if (data.isTabooMode && data.taboos) {

@@ -46,257 +46,116 @@ let roomState = {
 // Banco de palabras Premium (250 palabras con Tabúes)
 const WORD_BANK = {
     "Comida": [
-        { word: "Pizza", taboos: ["Queso", "Italia", "Masa", "Redonda"] },
-        { word: "Hamburguesa", taboos: ["Carne", "Pan", "McDonalds", "Ketchup"] },
-        { word: "Sushi", taboos: ["Arroz", "Pescado", "Japón", "Palillos"] },
-        { word: "Tacos", taboos: ["Tortilla", "México", "Picante", "Carne"] },
-        { word: "Helado", taboos: ["Frío", "Postre", "Cono", "Verano"] },
-        { word: "Paella", taboos: ["Arroz", "España", "Valencia", "Marisco"] },
-        { word: "Lasagna", taboos: ["Pasta", "Queso", "Horno", "Capas"] },
-        { word: "Empanada", taboos: ["Masa", "Relleno", "Horno", "Frita"] },
-        { word: "Pollo Frito", taboos: ["KFC", "Aceite", "Crispy", "Crujiente"] },
-        { word: "Papas Fritas", taboos: ["Aceite", "Sal", "Patata", "Ketchup"] },
-        { word: "Arepa", taboos: ["Maíz", "Colombia", "Venezuela", "Queso"] },
-        { word: "Churros", taboos: ["Chocolate", "Fritos", "Azúcar", "Masa"] },
-        { word: "Ceviche", taboos: ["Pescado", "Limón", "Perú", "Crudo"] },
-        { word: "Crepe", taboos: ["Francia", "Dulce", "Masa", "Nutella"] },
+        { word: "Pizza", taboos: ["Masa", "Italia", "Queso", "Domino's"] },
+        { word: "Hamburguesa", taboos: ["Carne", "McDonald's", "Burguer King", "Pan"] },
+        { word: "Sushi", taboos: ["Arroz", "Pescado", "Palillos", "Japón"] },
+        { word: "Tacos", taboos: ["México", "Tortilla", "Picante", "Carne"] },
+        { word: "Helado", taboos: ["Frío", "Cucurucho", "Postre", "Verano"] },
+        { word: "Paella", taboos: ["Arroz", "España", "Valencia", "Domingo"] },
+        { word: "Kebab", taboos: ["Carne", "Salsa", "Rollo", "Turquía"] },
+        { word: "Donut", taboos: ["Agujero", "Dulce", "Chocolate", "Glaseado"] },
+        { word: "Perrito Caliente", taboos: ["Salchicha", "Pan", "Mostaza", "Ketchup"] },
         { word: "Tortilla de Patatas", taboos: ["Huevo", "Cebolla", "España", "Sartén"] },
-        { word: "Croquetas", taboos: ["Bechamel", "Jamón", "Fritas", "Abuela"] },
+        { word: "Croquetas", taboos: ["Bechamel", "Abuela", "Frito", "Jamón"] },
+        { word: "Nachos", taboos: ["Queso", "México", "Triángulo", "Guacamole"] },
+        { word: "Ceviche", taboos: ["Pescado", "Limón", "Perú", "Crudo"] },
+        { word: "Chocolate", taboos: ["Dulce", "Tableta", "Cacao", "Negro"] },
+        { word: "Arepa", taboos: ["Maíz", "Venezuela", "Colombia", "Queso"] },
+        { word: "Brownie", taboos: ["Chocolate", "Nueces", "Bizcocho", "Postre"] },
+        { word: "Churros", taboos: ["Chocolate", "Desayuno", "Masa", "Fritos"] },
+        { word: "Salmón", taboos: ["Pescado", "Naranja", "Noruega", "Sushi"] },
         { word: "Gazpacho", taboos: ["Tomate", "Frío", "Sopa", "Verano"] },
-        { word: "Ensalada", taboos: ["Lechuga", "Tomate", "Sana", "Verde"] },
-        { word: "Sopa", taboos: ["Cuchara", "Caldo", "Caliente", "Fideos"] },
-        { word: "Espaguetis", taboos: ["Pasta", "Italia", "Largos", "Carbonara"] },
-        { word: "Macarrones", taboos: ["Pasta", "Queso", "Cortos", "Tomate"] },
-        { word: "Bocadillo", taboos: ["Pan", "Mitad", "Jamón", "Almuerzo"] },
-        { word: "Nachos", taboos: ["Queso", "México", "Triángulos", "Guacamole"] },
-        { word: "Burrito", taboos: ["Enrollado", "México", "Tortilla", "Frijoles"] },
-        { word: "Fajitas", taboos: ["Pollo", "Tortilla", "Cebolla", "Pimientos"] },
-        { word: "Perrito Caliente", taboos: ["Salchicha", "Pan", "Mustaza", "Cine"] },
-        { word: "Donut", taboos: ["Agujero", "Hommer", "Azúcar", "Dulce"] },
-        { word: "Galletas", taboos: ["Horno", "Chocolate", "María", "Leche"] },
-        { word: "Brownie", taboos: ["Chocolate", "Cuadrado", "Nueces", "Bizcocho"] },
-        { word: "Tarta", taboos: ["Cumpleaños", "Velas", "Cortar", "Dulce"] },
-        { word: "Pastel", taboos: ["Boda", "Pisos", "Crema", "Dulce"] },
-        { word: "Natillas", taboos: ["Canela", "Galleta", "Amarillo", "Postre"] },
-        { word: "Flan", taboos: ["Caramelo", "Tembloroso", "Postre", "Huevo"] },
-        { word: "Arroz con Leche", taboos: ["Canela", "Postre", "Blanco", "Cuchara"] },
-        { word: "Macedonia", taboos: ["Fruta", "Mezcla", "Postre", "Tazón"] },
-        { word: "Yogur", taboos: ["Leche", "Cuchara", "Danone", "Blanco"] },
-        { word: "Queso", taboos: ["Leche", "Ratón", "Amarillo", "Fundir"] },
-        { word: "Jamón", taboos: ["Cerdo", "Cortar", "Pata", "Serrano"] },
-        { word: "Chorizo", taboos: ["Rojo", "Cerdo", "Pimentón", "Embutido"] },
-        { word: "Salchichón", taboos: ["Blanco", "Pimienta", "Embutido", "Cerdo"] },
-        { word: "Lentejas", taboos: ["Hierro", "Cuchara", "Plato", "Chorizo"] },
-        { word: "Garbanzos", taboos: ["Cocido", "Hummus", "Legumbre", "Redondos"] },
-        { word: "Alubias", taboos: ["Frijoles", "Blancas", "Legumbre", "Plato"] },
-        { word: "Puré", taboos: ["Patata", "Aplastado", "Bebé", "Cuchara"] },
-        { word: "Salmón", taboos: ["Naranja", "Pescado", "Noruega", "Crudo"] },
-        { word: "Atún", taboos: ["Lata", "Pescado", "Gato", "Aceite"] },
-        { word: "Pollo Asado", taboos: ["Horno", "Piel", "Domingo", "Pájaros"] },
-        { word: "Costillas", taboos: ["Cerdo", "Huesos", "Barbacoa", "Chupar"] },
-        { word: "Kebab", taboos: ["Rollo", "Carne", "Turquía", "Salsa"] },
-        { word: "Guacamole", taboos: ["Aguacate", "Nachos", "Verde", "México"] }
+        { word: "Bocadillo", taboos: ["Pan", "Jamón", "Almuerzo", "Bocata"] }
     ],
     "Animales": [
         { word: "Perro", taboos: ["Ladrido", "Gato", "Mascota", "Hueso"] },
         { word: "Gato", taboos: ["Miau", "Ratón", "Bigotes", "Felino"] },
-        { word: "Elefante", taboos: ["Trompa", "Grande", "Gris", "África"] },
         { word: "León", taboos: ["Rey", "Selva", "Melena", "Rugido"] },
+        { word: "Elefante", taboos: ["Trompa", "Grande", "Gris", "África"] },
         { word: "Jirafa", taboos: ["Cuello", "Largo", "Amarillo", "Manchas"] },
-        { word: "Mono", taboos: ["Plátano", "Árbol", "Evolución", "Chimpancé"] },
+        { word: "Mono", taboos: ["Plátano", "Árbol", "Evolución", "Primate"] },
         { word: "Delfín", taboos: ["Agua", "Mar", "Inteligente", "Saltar"] },
         { word: "Serpiente", taboos: ["Veneno", "Reptil", "Larga", "Arrastrarse"] },
-        { word: "Caballo", taboos: ["Montar", "Relincho", "Carrera", "Galope"] },
-        { word: "Pingüino", taboos: ["Hielo", "Polo", "Frío", "Pájaro"] },
-        { word: "Tigre", taboos: ["Rayas", "Felino", "Gato", "Naranja"] },
-        { word: "Oso", taboos: ["Miel", "Polar", "Grande", "Pardo"] },
-        { word: "Lobo", taboos: ["Aullar", "Luna", "Perro", "Manada"] },
-        { word: "Zorro", taboos: ["Naranja", "Astuto", "Cola", "Bosque"] },
-        { word: "Conejo", taboos: ["Zanahoria", "Orejas", "Saltar", "Blanco"] },
-        { word: "Ratón", taboos: ["Queso", "Gato", "Pequeño", "Roedor"] },
-        { word: "Murciélago", taboos: ["Volar", "Vampiro", "Noche", "Ciego"] },
-        { word: "Águila", taboos: ["Volar", "Pájaro", "Ojos", "Garras"] },
-        { word: "Búho", taboos: ["Noche", "Ojos", "Pájaro", "Girar"] },
-        { word: "Loro", taboos: ["Hablar", "Pájaro", "Colores", "Pirata"] },
-        { word: "Pato", taboos: ["Cuac", "Agua", "Pájaro", "Amarillo"] },
-        { word: "Cisne", taboos: ["Blanco", "Cuello", "Pájaro", "Feo"] },
-        { word: "Vaca", taboos: ["Leche", "Muu", "Blanco", "Negro"] },
-        { word: "Cerdito", taboos: ["Rosa", "Oink", "Barro", "Jamón"] },
-        { word: "Oveja", taboos: ["Lana", "Bee", "Blanca", "Rebaño"] },
-        { word: "Cabra", taboos: ["Cuernos", "Montaña", "Mee", "Queso"] },
-        { word: "Gallina", taboos: ["Huevos", "Pico", "Granja", "Coro"] },
-        { word: "Gallo", taboos: ["Kikiriki", "Mañana", "Despertador", "Granja"] },
-        { word: "Cocodrilo", taboos: ["Dientes", "Reptil", "Agua", "Verde"] },
-        { word: "Tortuga", taboos: ["Lenta", "Caparazón", "Reptil", "Verde"] },
-        { word: "Rana", taboos: ["Saltar", "Croac", "Verde", "Verruga"] },
-        { word: "Ballena", taboos: ["Mar", "Enorme", "Agua", "Gorda"] },
+        { word: "Pingüino", taboos: ["Hielo", "Antártida", "Frío", "Pájaro"] },
         { word: "Tiburón", taboos: ["Dientes", "Aleta", "Miedo", "Mar"] },
-        { word: "Pulpo", taboos: ["Tentáculos", "Mar", "Ocho", "Tinta"] },
-        { word: "Cangrejo", taboos: ["Pinzas", "Lado", "Rojo", "Mar"] },
-        { word: "Estrella de mar", taboos: ["Cinco", "Puntas", "Mar", "Cielo"] },
-        { word: "Araña", taboos: ["Ocho", "Patas", "Tela", "Miedo"] },
-        { word: "Mosca", taboos: ["Volar", "Molesta", "Basura", "Negra"] },
-        { word: "Mosquito", taboos: ["Picar", "Sangre", "Verano", "Zumbido"] },
-        { word: "Abeja", taboos: ["Miel", "Picar", "Amarilla", "Negra"] },
-        { word: "Mariposa", taboos: ["Volar", "Colores", "Oruga", "Cielo"] },
-        { word: "Hormiga", taboos: ["Pequeña", "Trabajo", "Negra", "Fila"] },
-        { word: "Gusano", taboos: ["Tierra", "Largo", "Arrastrar", "Pescar"] },
-        { word: "Caracol", taboos: ["Lento", "Concha", "Cuernos", "Baboso"] },
-        { word: "Camello", taboos: ["Joroba", "Desierto", "Reyes", "Agua"] },
-        { word: "Cebra", taboos: ["Rayas", "Caballo", "Blanco", "Negro"] },
-        { word: "Hipopótamo", taboos: ["Gordo", "Agua", "Boca", "Gris"] },
-        { word: "Rinoceronte", taboos: ["Cuerno", "Gris", "Fuerte", "Frente"] },
-        { word: "Panda", taboos: ["Bambú", "China", "Oso", "Blanco"] },
-        { word: "Canguro", taboos: ["Australia", "Saltar", "Bolsa", "Boxeo"] }
+        { word: "Oso Panda", taboos: ["Bambú", "China", "Blanco", "Negro"] },
+        { word: "Canguro", taboos: ["Australia", "Saltar", "Bolsa", "Boxeo"] },
+        { word: "Vaca", taboos: ["Leche", "Muu", "Queso", "Cuernos"] },
+        { word: "Oveja", taboos: ["Lana", "Blanca", "Bee", "Rebaño"] },
+        { word: "Araña", taboos: ["Ocho", "Patas", "Tela", "Picadura"] },
+        { word: "Caballo", taboos: ["Montar", "Galope", "Relincho", "Carrera"] },
+        { word: "Abeja", taboos: ["Miel", "Picar", "Amarillo", "Polen"] },
+        { word: "Murciélago", taboos: ["Volar", "Vampiro", "Noche", "Cueva"] },
+        { word: "Cocodrilo", taboos: ["Dientes", "Reptil", "Agua", "Verde"] }
     ],
     "Países": [
-        { word: "España", taboos: ["Europa", "Madrid", "Tapas", "Paella"] },
-        { word: "México", taboos: ["Tacos", "América", "Picante", "Mariachi"] },
-        { word: "Argentina", taboos: ["Messi", "Tango", "Asado", "América"] },
-        { word: "Japón", taboos: ["Asia", "Sushi", "Anime", "Tokio"] },
-        { word: "Estados Unidos", taboos: ["América", "Inglés", "Washington", "Dólar"] },
+        { word: "España", taboos: ["Tapas", "Real Madrid", "Barça", "Siesta"] },
+        { word: "México", taboos: ["Tacos", "Picante", "Mariachi", "Tequila"] },
+        { word: "Argentina", taboos: ["Messi", "Asado", "Boludo", "Milei"] },
+        { word: "Japón", taboos: ["Sushi", "Anime", "Tokio", "Samurái"] },
+        { word: "Estados Unidos", taboos: ["Disney", "Dólar", "McDonald's", "Trump"] },
         { word: "Brasil", taboos: ["Carnaval", "Fútbol", "Río", "Amazonas"] },
-        { word: "Francia", taboos: ["París", "Europa", "Torre Eiffel", "Croissant"] },
-        { word: "Italia", taboos: ["Pizza", "Pasta", "Roma", "Europa"] },
-        { word: "China", taboos: ["Asia", "Muralla", "Población", "Mandarín"] },
-        { word: "Reino Unido", taboos: ["Londres", "Inglés", "Té", "Rey"] },
-        { word: "Alemania", taboos: ["Berlín", "Cerveza", "Europa", "Salchichas"] },
-        { word: "Portugal", taboos: ["Lisboa", "Vecino", "Cristiano", "Cristiano Ronaldo"] },
-        { word: "Rusia", taboos: ["Vodka", "Frío", "Grande", "Moscú"] },
-        { word: "Australia", taboos: ["Canguros", "Koala", "Isla", "Abajo"] },
-        { word: "Canadá", taboos: ["Nieve", "Hoja", "Arriba", "Estados Unidos"] },
-        { word: "India", taboos: ["Asia", "Vacas", "Picante", "Gente"] },
-        { word: "Colombia", taboos: ["Café", "América", "Arepas", "Shakira"] },
-        { word: "Perú", taboos: ["Machu Picchu", "Ceviche", "Llama", "América"] },
-        { word: "Chile", taboos: ["Largo", "Andes", "América", "Terremotos"] },
-        { word: "Cuba", taboos: ["Isla", "Fidel", "Puros", "Coche"] },
-        { word: "Corea del Sur", taboos: ["Kpop", "Seúl", "Norte", "Asia"] },
-        { word: "Grecia", taboos: ["Dioses", "Ruinas", "Europa", "Blanco"] },
-        { word: "Suiza", taboos: ["Relojes", "Chocolate", "Queso", "Montañas"] },
-        { word: "Suecia", taboos: ["IKEA", "Rubios", "Frío", "Norte"] },
-        { word: "Noruega", taboos: ["Fiordos", "Vikingos", "Frío", "Norte"] },
-        { word: "Turquía", taboos: ["Estambul", "Kebab", "Pelo", "Mezquita"] },
-        { word: "Tailandia", taboos: ["Asia", "Playa", "Buda", "Picante"] },
-        { word: "Vietnam", taboos: ["Asia", "Guerra", "Sombrero", "Moto"] },
-        { word: "Jamaica", taboos: ["Marley", "Fumar", "Correr", "Isla"] },
-        { word: "Ecuador", taboos: ["Mitad", "América", "Galápagos", "Selva"] },
-        { word: "Venezuela", taboos: ["Arepas", "Petróleo", "América", "Caracas"] },
-        { word: "Bolivia", taboos: ["América", "Altura", "Mar", "Salar"] },
-        { word: "Uruguay", taboos: ["Mate", "Pequeño", "América", "Fútbol"] },
-        { word: "Irlanda", taboos: ["Verde", "Duendes", "Cerveza", "Europa"] },
-        { word: "Escocia", taboos: ["Falda", "Gaita", "Monstruo", "Reino Unido"] },
-        { word: "Polonia", taboos: ["Vodka", "Frío", "Europa", "Curie"] },
-        { word: "Rumania", taboos: ["Drácula", "Castillo", "Europa", "Cárpatos"] },
-        { word: "Nueva Zelanda", taboos: ["Canguros", "Anillos", "Isla", "Ovejas"] },
-        { word: "Arabia Saudí", taboos: ["Petróleo", "Desierto", "Rico", "Cristiano"] },
-        { word: "Emiratos Árabes", taboos: ["Dubái", "Rico", "Edificio", "Desierto"] },
-        { word: "Filipinas", taboos: ["Islas", "Asia", "Inglés", "Tifón"] },
-        { word: "Indonesia", taboos: ["Bali", "Islas", "Asia", "Volcanes"] },
-        { word: "Islandia", taboos: ["Hielo", "Volcanes", "Isla", "Frío"] },
-        { word: "Groenlandia", taboos: ["Blanco", "Isla", "Frío", "Norte"] },
-        { word: "Ucrania", taboos: ["Europa", "Amarillo", "Azul", "Rusia"] }
+        { word: "Francia", taboos: ["París", "Torre Eiffel", "Croissant", "Baggette"] },
+        { word: "Italia", taboos: ["Pizza", "Pasta", "Roma", "Vaticano"] },
+        { word: "China", taboos: ["Muralla", "Asia", "Comida", "Tienda"] },
+        { word: "Reino Unido", taboos: ["Londres", "Té", "Rey", "Inglés"] },
+        { word: "Alemania", taboos: ["Berlín", "Cerveza", "Salchicha", "Coche"] },
+        { word: "Portugal", taboos: ["Cristiano Ronaldo", "Lisboa", "Vecino", "Vecinos"] },
+        { word: "Rusia", taboos: ["Vodka", "Frío", "Putin", "Guerra"] },
+        { word: "Australia", taboos: ["Canguro", "Koala", "Ila", "Inglés"] },
+        { word: "Corea del Sur", taboos: ["K-pop", "Seúl", "Samsung", "Norte"] },
+        { word: "Grecia", taboos: ["Yogur", "Dioses", "Islas", "Atenas"] },
+        { word: "Andorra", taboos: ["Youtubers", "Impuestos", "Esquí", "Cerca"] },
+        { word: "Marruecos", taboos: ["Cuscús", "Desierto", "Abajo", "Té"] }
     ],
-    "Famosos Reales/Históricos": [
-        { word: "Brad Pitt", taboos: ["Actor", "Hollywood", "Película", "Rubio"] },
-        { word: "Michael Jackson", taboos: ["Cantante", "Pop", "Luna", "Baile"] },
-        { word: "Leonardo DiCaprio", taboos: ["Titanic", "Actor", "Oscar", "Oso"] },
-        { word: "Cristiano Ronaldo", taboos: ["Fútbol", "Portugal", "Deporte", "Bicho"] },
-        { word: "Shakira", taboos: ["Cantante", "Colombia", "Piqué", "Caderas"] },
-        { word: "Albert Einstein", taboos: ["Científico", "Física", "Relatividad", "Pelo"] },
-        { word: "Marilyn Monroe", taboos: ["Actriz", "Rubia", "Vestido", "Hollywood"] },
-        { word: "Elvis Presley", taboos: ["Rey", "Rock", "Cantante", "Guitarra"] },
-        { word: "Will Smith", taboos: ["Actor", "Hombre", "Negro", "Bofetón"] },
-        { word: "Lady Gaga", taboos: ["Cantante", "Extravagante", "Vestido", "Pop"] },
-        { word: "Lionel Messi", taboos: ["Fútbol", "Argentino", "Balón", "Mundial"] },
-        { word: "Diego Maradona", taboos: ["Fútbol", "Argentino", "Mano", "Dios"] },
-        { word: "Rafa Nadal", taboos: ["Tenis", "Deporte", "Tierra", "Raqueta"] },
-        { word: "Fernando Alonso", taboos: ["Coches", "Asturias", "Motor", "Conducir"] },
-        { word: "Julio Iglesias", taboos: ["Cantante", "Padre", "Moreno", "España"] },
-        { word: "Rosalía", taboos: ["Motomami", "Cantante", "Uñas", "España"] },
-        { word: "Penélope Cruz", taboos: ["Actriz", "Oscar", "Javier", "Almodóvar"] },
-        { word: "Antonio Banderas", taboos: ["Actor", "Málaga", "Zorro", "Gato"] },
-        { word: "Adolf Hitler", taboos: ["Alemania", "Malo", "Guerra", "Bigote"] },
-        { word: "Cristóbal Colón", taboos: ["Barcos", "América", "Descubrir", "Mundo"] },
-        { word: "Cleopatra", taboos: ["Egipto", "Reina", "Pirámides", "Marco Antonio"] },
-        { word: "Julio César", taboos: ["Roma", "Emperador", "Espada", "Asesinato"] },
-        { word: "Leonardo da Vinci", taboos: ["Pintor", "Mona Lisa", "Inventos", "Renacimiento"] },
-        { word: "Picasso", taboos: ["Pintor", "Cuadros", "Ojos", "España"] },
-        { word: "Dalí", taboos: ["Pintor", "Relojes", "Bigote", "Loco"] },
-        { word: "Steve Jobs", taboos: ["Apple", "iPhone", "Ordenador", "Negro"] },
-        { word: "Bill Gates", taboos: ["Windows", "Microsoft", "Rico", "Ordenador"] },
-        { word: "Elon Musk", taboos: ["Tesla", "Twitter", "Espacio", "Rico"] },
-        { word: "Mark Zuckerberg", taboos: ["Facebook", "Meta", "Gafas", "Red"] },
-        { word: "Donald Trump", taboos: ["Presidente", "América", "Pelo", "Rubio"] },
-        { word: "Barack Obama", taboos: ["Presidente", "América", "Negro", "Blanca"] },
-        { word: "Freddie Mercury", taboos: ["Queen", "Cantante", "Bigote", "Rock"] },
-        { word: "John Lennon", taboos: ["Los Beatles", "Gafas", "Cantante", "Imagine"] },
-        { word: "Tom Cruise", taboos: ["Actor", "Misión", "Película", "Correr"] },
-        { word: "Johnny Depp", taboos: ["Actor", "Pirata", "Jack", "Película"] },
-        { word: "Keanu Reeves", taboos: ["Actor", "Matrix", "John Wick", "Película"] },
-        { word: "Vin Diesel", taboos: ["Actor", "Coches", "Calvo", "Familia"] },
-        { word: "Dwayne Johnson (La Roca)", taboos: ["Actor", "Fuerte", "Calvo", "Lucha"] },
-        { word: "Arnold Schwarzenegger", taboos: ["Terminator", "Músculos", "Gobernador", "Actor"] },
-        { word: "Sylvester Stallone", taboos: ["Rocky", "Rambo", "Boxeo", "Actor"] },
-        { word: "Jackie Chan", taboos: ["Actor", "China", "Karate", "Gracioso"] },
-        { word: "Bruce Lee", taboos: ["Lucha", "Karate", "Rápido", "Amarillo"] },
-        { word: "Eminem", taboos: ["Rap", "Cantante", "Blanco", "Rápido"] },
-        { word: "Snoop Dogg", taboos: ["Rap", "Fumar", "Hierba", "Cantante"] },
-        { word: "Justin Bieber", taboos: ["Cantante", "Peinado", "Niño", "Pop"] },
-        { word: "Bad Bunny", taboos: ["Conejo", "Cantante", "Reggaeton", "Puerto Rico"] },
-        { word: "Daddy Yankee", taboos: ["Gasolina", "Cantante", "Reggaeton", "Jefe"] },
-        { word: "Taylor Swift", taboos: ["Cantante", "Rubia", "Guitara", "Exnovios"] },
-        { word: "Beyoncé", taboos: ["Cantante", "Negra", "Rey", "Voz"] },
-        { word: "Rihanna", taboos: ["Cantante", "Paraguas", "Maquillaje", "Frente"] }
+    "Famosos": [
+        { word: "Cristiano Ronaldo", taboos: ["Fútbol", "Portugal", "Bicho", "Siuuu"] },
+        { word: "Lionel Messi", taboos: ["Fútbol", "Argentina", "Barça", "Balón de Oro"] },
+        { word: "Shakira", taboos: ["Piqué", "Bizarrap", "Colombia", "Caderas"] },
+        { word: "Bizarrap", taboos: ["Gorra", "Gafas", "Sesión", "Música"] },
+        { word: "Quevedo", taboos: ["52", "Canarias", "Stay", "Verano"] },
+        { word: "C. Tangana", taboos: ["Rosalía", "Yate", "Madrileño", "Música"] },
+        { word: "Bad Bunny", taboos: ["Puerto Rico", "Trap", "Conejo", "Música"] },
+        { word: "Zendaya", taboos: ["Euphoria", "Spider-man", "Dune", "Actriz"] },
+        { word: "Tom Holland", taboos: ["Spider-man", "Zendaya", "Actor", "Marvel"] },
+        { word: "Margot Robbie", taboos: ["Barbie", "Rubia", "Actor", "Lobo de Wall Street"] },
+        { word: "Georgina Rodríguez", taboos: ["Cristiano", "Netflix", "Modelo", "Joyas"] },
+        { word: "Elon Musk", taboos: ["Twitter", "Tesla", "X", "Rico"] },
+        { word: "Ibai Llanos", taboos: ["Twitch", "Velada", "Gordo", "Kings League"] },
+        { word: "Brad Pitt", taboos: ["Angelina", "Actor", "Guapo", "Hollywood"] },
+        { word: "Leonardo DiCaprio", taboos: ["Titanic", "Oscar", "Novias", "Oso"] },
+        { word: "Adolf Hitler", taboos: ["Alemania", "Guerra", "Bigote", "Nazismo"] },
+        { word: "Cristóbal Colón", taboos: ["Descubrir", "Barcos", "América", "Indias"] }
     ],
-    "Influencers (Mundial/España)": [
-        { word: "Ibai Llanos", taboos: ["Twitch", "Eventos", "Velada", "Gordo"] },
-        { word: "El Rubius", taboos: ["YouTube", "Noruega", "Gatos", "Juegos"] },
-        { word: "AuronPlay", taboos: ["Twitch", "Broma", "Zumos", "Abduzcan"] },
-        { word: "TheGrefg", taboos: ["Contador", "Skin", "Andorra", "Premios"] },
-        { word: "IlloJuan", taboos: ["Málaga", "Andalucía", "Masi", "Twitch"] },
-        { word: "Xokas", taboos: ["Basura", "Comida", "Cuentas", "WoW"] },
-        { word: "Dulceida", taboos: ["Moda", "Instagram", "Ropa", "Festival"] },
-        { word: "Lola Lolita", taboos: ["Cantar", "TikTok", "Baile", "Hermana"] },
-        { word: "DjMaRiiO", taboos: ["Fútbol", "FIFA", "Madrid", "YouTube"] },
-        { word: "Rivers", taboos: ["Amigas", "Velada", "México", "Pelea"] },
-        { word: "MrBeast", taboos: ["Dinero", "Retos", "YouTube", "Regalar"] },
-        { word: "Luisito Comunica", taboos: ["Viajes", "México", "Pelos", "YouTube"] },
-        { word: "Vegetta777", taboos: ["Minecraft", "Morado", "Willyrex", "Cubo"] },
-        { word: "Willyrex", taboos: ["Vegetta", "Ojos", "NFT", "YouTube"] },
-        { word: "PewDiePie", taboos: ["Número", "Sueco", "YouTube", "Inglés"] },
-        { word: "IShowSpeed", taboos: ["Loco", "Cristiano", "Ladrido", "Negro"] },
-        { word: "Spreen", taboos: ["Argentina", "Oso", "Twitch", "Minecraft"] },
-        { word: "Juan Guarnizo", taboos: ["Gafas", "Ari", "Cama", "México"] },
-        { word: "AriGameplays", taboos: ["Juan", "Escote", "Jugar", "México"] },
-        { word: "Biyin", taboos: ["Auron", "Rubia", "Nazi", "Twitch"] },
-        { word: "Mister Jägger", taboos: ["Pelea", "Loco", "Caja", "Vídeos"] },
-        { word: "Jordi Wild", taboos: ["Podcast", "Músculos", "Papá", "YouTube"] },
-        { word: "Plex (YoSoyPlex)", taboos: ["Mundo", "Frank", "Viajes", "Alto"] },
-        { word: "Frank Cuesta", taboos: ["Animales", "Serpientes", "Gorra", "Puta"] },
-        { word: "Wismichu", taboos: ["Calvo", "Botella", "Película", "Polémica"] },
-        { word: "Dalas Review", taboos: ["Juicios", "Polémica", "Pambisito", "Perro"] },
-        { word: "Marina Rivers", taboos: ["TikTok", "Derecho", "Velada", "Lola"] },
-        { word: "Marta Díaz", taboos: ["Lolita", "Novio", "Instagram", "Ropa"] },
-        { word: "Laura Escanes", taboos: ["Risto", "Audio", "Instagram", "Hija"] },
-        { word: "María Pombo", taboos: ["Pijas", "Castellano", "Instagram", "Hermanas"] },
-        { word: "Iker Casillas", taboos: ["TikTok", "Fútbol", "Portero", "Pueblo"] },
-        { word: "Piqué", taboos: ["Shakira", "Kings", "Fútbol", "Periscope"] },
-        { word: "Komanche", taboos: ["México", "Eventos", "Gordo", "Caída"] },
-        { word: "Gemita", taboos: ["Grefg", "Auron", "Presidenta", "Pádel"] },
-        { word: "Nia", taboos: ["Canarias", "Rubius", "Disney", "Cantar"] },
-        { word: "Nil Ojeda", taboos: ["Retos", "Pelo", "YouTube", "Calles"] },
-        { word: "ByTarifa", taboos: ["Nil", "Risas", "Shooter", "Escuadrón"] },
-        { word: "RickyEdit", taboos: ["Memes", "Gorras", "Reacciones", "YouTube"] },
-        { word: "Papi Gavi", taboos: ["Fútbol", "Gritar", "Calvo", "Sano"] },
-        { word: "Spursito", taboos: ["Andorra", "Gafas", "Fútbol", "Rayo"] },
-        { word: "Geronimo Benavides (Momo)", taboos: ["Argentina", "Platense", "Boca", "Velada"] },
-        { word: "Coscu", taboos: ["Argentina", "Cantar", "Baile", "Pelo"] },
-        { word: "Karchez", taboos: ["Coche", "Auron", "Voces", "Twitch"] },
-        { word: "Reborn", taboos: ["Auron", "Traje", "Gta", "Voz"] },
-        { word: "Cristinini", taboos: ["Grand Prix", "Presentadora", "Rubia", "Ibai"] },
-        { word: "Knekro", taboos: ["Viejo", "Ibai", "Lol", "Gatos"] },
-        { word: "ElMillor", taboos: ["Lol", "Tóxico", "Calvo", "Twitch"] },
-        { word: "Werlyb", taboos: ["Málaga", "Lol", "Ibai", "Gafas"] },
+    "Influencers": [
+        { word: "Plex", taboos: ["Mundo", "Capibara", "YouTube", "Frank Cuesta"] },
+        { word: "AuronPlay", taboos: ["Broma", "Zumos", "Twitch", "Abduzcan"] },
+        { word: "TheGrefg", taboos: ["Contador", "Skin", "Fortnite", "Andorra"] },
+        { word: "IlloJuan", taboos: ["Málaga", "Masi", "LMDShow", "Twitch"] },
+        { word: "El Rubius", taboos: ["YouTube", "Gatos", "Minecraft", "Pionero"] },
+        { word: "MrBeast", taboos: ["Dinero", "Retos", "Regalar", "YouTube"] },
+        { word: "Hasbulla", taboos: ["Pequeño", "Ruso", "Pelea", "Niño"] },
+        { word: "Khaby Lame", taboos: ["Manos", "Gesto", "TikTok", "Silencio"] },
+        { word: "Xokas", taboos: ["Gritos", "Comida", "Twitter", "Twitch"] },
+        { word: "Lola Lolita", taboos: ["TikTok", "Baile", "Hambre", "Influencer"] },
+        { word: "Aitana", taboos: ["Cantante", "OT", "Alpha", "Sebastian Yatra"] }
+    ],
+    "Series y Películas": [
+        { word: "Harry Potter", taboos: ["Magia", "Gafas", "Varita", "Cicatriz"] },
+        { word: "La Casa de Papel", taboos: ["Atraco", "Máscara", "Dalí", "Netflix"] },
+        { word: "Stranger Things", taboos: ["Once", "Niños", "Ochenta", "Demogorgon"] },
+        { word: "Spider-Man", taboos: ["Araña", "Telaraña", "Peter Parker", "Marvel"] },
+        { word: "Star Wars", taboos: ["Espada", "Láser", "Vader", "Fuerza"] },
+        { word: "Titanic", taboos: ["Barco", "Hielo", "Jack", "Rose"] },
+        { word: "Shrek", taboos: ["Burro", "Pantano", "Verde", "Ogro"] },
+        { word: "Los Simpson", taboos: ["Amarillo", "Homer", "Tele", "Dibujos"] },
+        { word: "Breaking Bad", taboos: ["Cristal", "Drogas", "Walter White", "Cáncer"] },
+        { word: "El Juego del Calamar", taboos: ["Corea", "Netflix", "Rojo", "Juegos"] },
+        { word: "Juego de Tronos", taboos: ["Dragones", "Trono", "Jon Nieve", "Serie"] },
+        { word: "Toy Story", taboos: ["Juguetes", "Woody", "Buzz", "Amigo"] },
+        { word: "Avengers", taboos: ["Marvel", "Héroes", "Thanos", "Vengadores"] },
+        { word: "Avatar", taboos: ["Azul", "Planeta", "Pandora", "Cine"] }
+    ],i", "Gafas"] },
         { word: "Agustin51", taboos: ["Fortnite", "Sevilla", "Gritos", "Grefg"] },
         { word: "Ampeter", taboos: ["Fortnite", "Casa", "Moto", "Grefg"] }
     ]
@@ -356,203 +215,211 @@ io.on('connection', (socket) => {
         callback({ success: true });
     });
 
-    // Iniciar juego desde el host
+    // --- GAME LOGIC ---
     socket.on('startGame', (settings) => {
         if (socket.id !== roomState.hostSocketId) return;
 
-        roomState.gameSettings = settings; // giveHint, numImpostors, hasJester, hasTwins, isTabooMode
+        roomState.gameSettings = settings;
         roomState.status = 'playing';
 
-        if (unusedWords.length === 0) {
-            initializeWordBank();
-        }
+        if (unusedWords.length === 0) initializeWordBank();
         
         const randomIdx = Math.floor(Math.random() * unusedWords.length);
-        const pickedWord = unusedWords.splice(randomIdx, 1)[0];
-        roomState.pickedWord = pickedWord;
+        roomState.pickedWord = unusedWords.splice(randomIdx, 1)[0];
 
-        const numPlayers = roomState.players.length;
+        // Inicializar jugadores como "vivos"
+        roomState.players.forEach(p => { 
+            p.eliminated = false; 
+            p.pendingElimination = false; 
+            p.disconnected = false; 
+        });
+
+        const activePlayers = roomState.players;
+        const numPlayers = activePlayers.length;
         
-        // Calcular roles
-        const numImpostors = settings.numImpostors || 1;
-        const requiredPlayers = numImpostors + (settings.hasJester ? 1 : 0) + (settings.hasTwins ? 2 : 0);
+        // Asignación de Roles
+        let indices = activePlayers.map((_, i) => i);
+        function pull() { return indices.splice(Math.floor(Math.random() * indices.length), 1)[0]; }
 
-        if (numPlayers < 3 || requiredPlayers > numPlayers) {
-            io.to(socket.id).emit('errorMsg', 'No hay suficientes jugadores para los roles elegidos.');
-            return;
+        const impostorIndices = [];
+        for(let i=0; i < (settings.numImpostors || 1); i++) {
+            if (indices.length > 0) impostorIndices.push(pull());
         }
-
-        let availableIndices = roomState.players.map((_, i) => i);
-        let impostorIndices = [];
-        let twinIndices = [];
-        let jesterIndex = null;
-
-        for(let i=0; i < numImpostors; i++) {
-            const r = Math.floor(Math.random() * availableIndices.length);
-            impostorIndices.push(availableIndices.splice(r, 1)[0]);
-        }
-
-        if (settings.hasJester) {
-            const r = Math.floor(Math.random() * availableIndices.length);
-            jesterIndex = availableIndices.splice(r, 1)[0];
-        }
-
-        if (settings.hasTwins) {
-            for(let i=0; i < 2; i++) {
-                const r = Math.floor(Math.random() * availableIndices.length);
-                twinIndices.push(availableIndices.splice(r, 1)[0]);
-            }
-        }
-
-        // Repartir roles a la roomState.players para el reveal final
-        roomState.specialRoles = { impostorIndices, twinIndices, jesterIndex };
+        
+        let jesterIndex = (settings.hasJester && indices.length > 0) ? pull() : null;
+        let twinIndices = (settings.hasTwins && indices.length >= 2) ? [pull(), pull()] : [];
 
         roomState.players.forEach((player, index) => {
-            const isImpostor = impostorIndices.includes(index);
-            const isJester = (index === jesterIndex);
-            const isTwin = twinIndices.includes(index);
-            
-            let otherTwinName = null;
-            if (isTwin) {
-                const otherTwinIndex = twinIndices.find(idx => idx !== index);
-                otherTwinName = roomState.players[otherTwinIndex].name;
-            }
-
             player.roleData = {
-                isImpostor,
-                isJester,
-                isTwin,
-                otherTwinName,
-                hasHint: settings.giveHint,
+                isImpostor: impostorIndices.includes(index),
+                isJester: index === jesterIndex,
+                isTwin: twinIndices.includes(index),
+                otherTwinName: twinIndices.includes(index) ? roomState.players[twinIndices.find(idx => idx !== index)].name : null,
+                word: roomState.pickedWord.word,
+                category: roomState.pickedWord.category,
+                taboos: roomState.pickedWord.taboos,
                 isTabooMode: settings.isTabooMode,
-                taboos: pickedWord.taboos,
-                category: pickedWord.category,
-                word: pickedWord.word
+                hasHint: settings.giveHint
             };
-
-            // Enviar rol exclusivamente al socket del jugador
             io.to(player.socketId).emit('receiveRole', player.roleData);
         });
 
-        // Notificar al host que el juego ha empezado
-        io.to(roomState.hostSocketId).emit('gameStarted', { category: pickedWord.category });
-    });
-
-    // Finalizar juego y pasar a Votación
-    socket.on('endGame', () => {
-        if (socket.id !== roomState.hostSocketId) return;
-        roomState.status = 'voting';
-        roomState.votes = {}; // reiniciar votos
-        
-        const playerNames = roomState.players.map(p => p.name);
-        roomState.players.forEach(p => {
-            io.to(p.socketId).emit('startVoting', { players: playerNames, me: p.name });
+        io.emit('gameStarted', { 
+            category: roomState.pickedWord.category,
+            players: roomState.players.map(p => ({ name: p.name, eliminated: false }))
         });
     });
 
-    // Jugador envía su voto
+    socket.on('endGame', () => {
+        if (socket.id !== roomState.hostSocketId) return;
+        startVotingPhase();
+    });
+
+    function startVotingPhase() {
+        roomState.status = 'voting';
+        roomState.votes = {};
+        const aliveNames = roomState.players.filter(p => !p.eliminated && !p.disconnected).map(p => p.name);
+        
+        roomState.players.forEach(p => {
+            if (!p.disconnected) {
+                io.to(p.socketId).emit('startVoting', { players: aliveNames, me: p.name });
+            }
+        });
+        
+        if(roomState.hostSocketId) {
+            io.to(roomState.hostSocketId).emit('startVoting', { players: aliveNames });
+        }
+    }
+
     socket.on('submitVote', (votedName) => {
         const voter = roomState.players.find(p => p.socketId === socket.id);
-        if(!voter) return;
+        if (!voter || voter.eliminated || roomState.status !== 'voting') return;
+
         roomState.votes[voter.name] = votedName;
-        
-        // Notificar al host que llegó un voto
-        if(roomState.hostSocketId) {
-            io.to(roomState.hostSocketId).emit('voteReceived', { totalVotes: Object.keys(roomState.votes).length });
+        const totalVotes = Object.keys(roomState.votes).length;
+        const alivePlayers = roomState.players.filter(p => !p.eliminated && !p.disconnected);
+
+        io.emit('voteReceived', { 
+            totalVotes, 
+            votedNames: Object.keys(roomState.votes) 
+        });
+
+        // REVELACIÓN AUTOMÁTICA si todos han votado
+        if (totalVotes >= alivePlayers.length && alivePlayers.length > 0) {
+            setTimeout(processElimination, 1500);
         }
     });
 
-    // Revelar Impostor
-    socket.on('revealImpostor', () => {
-        if (socket.id !== roomState.hostSocketId) return;
-        
-        const { impostorIndices, twinIndices, jesterIndex } = roomState.specialRoles;
-        const impostors = impostorIndices.map(idx => roomState.players[idx].name);
-        
-        let jester = null;
-        if (jesterIndex !== null) {
-            jester = roomState.players[jesterIndex].name;
-        }
+    function processElimination() {
+        if (roomState.status !== 'voting') return;
+        roomState.status = 'results';
 
-        let twins = null;
-        if (twinIndices && twinIndices.length === 2) {
-            twins = [roomState.players[twinIndices[0]].name, roomState.players[twinIndices[1]].name];
-        }
-        
-        // Recuento de Votos
-        let voteTally = {};
-        let highestVoted = [];
+        let tally = {};
         let maxVotes = 0;
+        let highestVoted = [];
 
-        Object.values(roomState.votes).forEach(vote => {
-            voteTally[vote] = (voteTally[vote] || 0) + 1;
-            if(voteTally[vote] > maxVotes) {
-                maxVotes = voteTally[vote];
-                highestVoted = [vote];
-            } else if (voteTally[vote] === maxVotes) {
-                highestVoted.push(vote);
+        Object.values(roomState.votes).forEach(v => {
+            tally[v] = (tally[v] || 0) + 1;
+            if (tally[v] > maxVotes) {
+                maxVotes = tally[v];
+                highestVoted = [v];
+            } else if (tally[v] === maxVotes) {
+                highestVoted.push(v);
             }
         });
 
+        // En caso de empate, elegimos uno al azar de los más votados
+        const expelledName = highestVoted[Math.floor(Math.random() * highestVoted.length)];
+        const expelledPlayer = roomState.players.find(p => p.name === expelledName);
+        
+        if (expelledPlayer) expelledPlayer.eliminated = true;
+
+        let gameEnded = false;
+        let winnerRole = "";
+
+        // 1. Victoria del Bufón
+        if (expelledPlayer && expelledPlayer.roleData.isJester) {
+            gameEnded = true;
+            winnerRole = "jester";
+        }
+
+        // 2. Muerte por pena (Gemelos)
+        if (expelledPlayer && expelledPlayer.roleData.isTwin) {
+            const partner = roomState.players.find(p => p.roleData.isTwin && p.name !== expelledName);
+            if (partner && !partner.eliminated) {
+                partner.pendingElimination = true;
+            }
+        }
+
+        // 3. Procesar muertes pendientes
+        roomState.players.forEach(p => {
+            if (p.pendingElimination) {
+                p.eliminated = true;
+                p.pendingElimination = false;
+            }
+        });
+
+        // 4. Comprobar victorias estándar
+        const aliveImpostors = roomState.players.filter(p => !p.eliminated && !p.disconnected && p.roleData.isImpostor);
+        const aliveCitizens = roomState.players.filter(p => !p.eliminated && !p.disconnected && !p.roleData.isImpostor && !p.roleData.isJester);
+
+        if (aliveImpostors.length === 0) {
+            gameEnded = true;
+            winnerRole = "citizens";
+        } else if (aliveImpostors.length >= aliveCitizens.length) {
+            gameEnded = true;
+            winnerRole = "impostors";
+        }
+
         const revealData = {
-            impostors,
-            jester,
-            twins,
+            eliminatedName: expelledName,
+            isImpostor: expelledPlayer ? expelledPlayer.roleData.isImpostor : false,
             word: roomState.pickedWord.word,
             category: roomState.pickedWord.category,
-            taboos: roomState.pickedWord.taboos,
-            isTabooMode: roomState.gameSettings.isTabooMode,
-            votes: roomState.votes,
-            highestVoted,
-            maxVotes
+            gameEnded,
+            winnerRole,
+            players: roomState.players.map(p => ({ name: p.name, eliminated: p.eliminated }))
         };
 
-        io.to(roomState.hostSocketId).emit('impostorRevealed', revealData);
-        
-        roomState.players.forEach(p => {
-            io.to(p.socketId).emit('impostorRevealed', revealData);
+        io.emit('impostorRevealed', revealData);
+    }
+
+    socket.on('startNextRound', () => {
+        if (socket.id !== roomState.hostSocketId) return;
+        roomState.status = 'playing';
+        roomState.votes = {};
+        io.emit('gameStarted', { 
+            category: roomState.pickedWord.category,
+            players: roomState.players.map(p => ({ name: p.name, eliminated: p.eliminated }))
         });
     });
 
-    // Volver a jugar
     socket.on('restartGame', () => {
         if (socket.id !== roomState.hostSocketId) return;
         roomState.status = 'lobby';
-        roomState.votes = {};
-        
-        // Limpiar jugadores que se desconectaron durante la partida
-        roomState.players = roomState.players.filter(p => !p.disconnected);
+        io.emit('returnToLobby');
+    });
 
-        // Mantener a los jugadores activos en la sala
-        io.to(roomState.hostSocketId).emit('playerJoined', { players: roomState.players.map(p => p.name) });
-        roomState.players.forEach(p => {
-            io.to(p.socketId).emit('backToLobby');
-        });
+    socket.on('checkStatus', (callback) => {
+        const player = roomState.players.find(p => p.socketId === socket.id);
+        if(player) callback({ eliminated: player.eliminated });
+        else callback({ eliminated: true });
     });
 
     socket.on('disconnect', () => {
-        // Manejar la desconexión del jugador de forma segura
-        const playerIndex = roomState.players.findIndex(p => p.socketId === socket.id);
-        if (playerIndex !== -1) {
+        const pIdx = roomState.players.findIndex(p => p.socketId === socket.id);
+        if (pIdx !== -1) {
             if (roomState.status === 'lobby') {
-                // Si estamos en el lobby, podemos borrarlo sin afectar a los índices del juego
-                roomState.players.splice(playerIndex, 1);
-                if (roomState.hostSocketId) {
-                    io.to(roomState.hostSocketId).emit('playerJoined', { players: roomState.players.map(p => p.name) });
-                }
+                roomState.players.splice(pIdx, 1);
             } else {
-                // Si la partida ha empezado, no borramos su índice, solo lo marcamos para no romper el array de Roles
-                roomState.players[playerIndex].disconnected = true;
-                if (roomState.hostSocketId) {
-                    const activeCount = roomState.players.filter(p => !p.disconnected).length;
-                    const totalVotes = Object.keys(roomState.votes).length;
-                    io.to(roomState.hostSocketId).emit('playerDisconnectedMidgame', { activeCount, totalVotes });
-                }
+                roomState.players[pIdx].disconnected = true;
+                const activeCount = roomState.players.filter(p => !p.disconnected).length;
+                const totalVotes = Object.keys(roomState.votes).length;
+                io.to(roomState.hostSocketId).emit('playerDisconnectedMidgame', { activeCount, totalVotes });
             }
+            io.emit('playerJoined', { players: roomState.players.filter(p => !p.disconnected).map(p => p.name) });
         }
-        if (socket.id === roomState.hostSocketId) {
-            roomState.hostSocketId = null;
-        }
+        if (socket.id === roomState.hostSocketId) roomState.hostSocketId = null;
     });
 });
 

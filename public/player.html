@@ -245,6 +245,10 @@
                         <i class="fas fa-hat-wizard text-4xl text-purple-400"></i>
                     </div>
                     <h2 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-purple-400 to-pink-500 mb-6 drop-shadow">EL BUFÓN</h2>
+                    <div id="role-image-container" class="mb-6 mx-auto w-32 h-32 rounded-2xl overflow-hidden border-2 border-white/20 shadow-2xl bg-black/20 flex items-center justify-center">
+                        <img id="role-image" src="" alt="" class="w-full h-full object-cover hidden">
+                        <div id="role-image-loader" class="text-white/20"><i class="fas fa-image text-4xl animate-pulse"></i></div>
+                    </div>
                     <div class="bg-black/40 w-full p-5 rounded-2xl border border-white/10 shadow-inner mb-4">
                         <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Palabra Secreta</p>
                         <p class="text-3xl font-black text-white mb-2">${roleData.word}</p>
@@ -254,6 +258,7 @@
                     <p class="text-sm font-medium text-purple-200 bg-purple-900/40 border border-purple-500/30 p-3 rounded-xl w-full">Tu objetivo es <span class="font-bold text-white">hacer que sospechen de ti</span> y te voten. ¡Si te echan, ganas tú solo!</p>
                     ${tabooHtml}
                 `;
+                fetchImage(roleData.word, roleData.category);
             } else if (roleData.isTwin) {
                 content.innerHTML = `
                     <div class="h-20 w-20 rounded-full bg-pink-500/20 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(236,72,153,0.5)] border border-pink-500/40">
@@ -279,6 +284,10 @@
                         <i class="fas fa-shield-alt text-4xl text-blue-400"></i>
                     </div>
                     <h2 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-blue-300 to-cyan-500 mb-6 drop-shadow">CIUDADANO</h2>
+                    <div id="role-image-container" class="mb-6 mx-auto w-32 h-32 rounded-2xl overflow-hidden border-2 border-white/20 shadow-2xl bg-black/20 flex items-center justify-center">
+                        <img id="role-image" src="" alt="" class="w-full h-full object-cover hidden">
+                        <div id="role-image-loader" class="text-white/20"><i class="fas fa-image text-4xl animate-pulse"></i></div>
+                    </div>
                     <div class="bg-black/40 w-full p-6 rounded-2xl border border-white/10 shadow-inner mb-2">
                         <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2">Palabra Secreta</p>
                         <p class="text-4xl font-black text-white mb-5 break-words tracking-tight">${roleData.word}</p>
@@ -287,14 +296,39 @@
                     </div>
                     ${tabooHtml}
                 `;
+                fetchImage(roleData.word, roleData.category);
             }
 
             // Restore Overlay
             tapOverlay.style.opacity = '1';
             tapOverlay.style.pointerEvents = 'auto';
-            document.getElementById('role-content').classList.add('reveal-blur');
+            roleContent.classList.add('reveal-blur');
             showScreen('role');
         });
+
+        async function fetchImage(word, category) {
+            const imgEl = document.getElementById('role-image');
+            const loader = document.getElementById('role-image-loader');
+            if(!imgEl) return;
+            
+            try {
+                const res = await fetch(`https://es.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(word)}`);
+                const data = await res.json();
+                if(data.originalimage) {
+                    imgEl.src = data.originalimage.source;
+                    imgEl.classList.remove('hidden');
+                    loader.classList.add('hidden');
+                } else {
+                    imgEl.src = `https://loremflickr.com/320/320/${encodeURIComponent(word)}`;
+                    imgEl.classList.remove('hidden');
+                    loader.classList.add('hidden');
+                }
+            } catch(e) {
+                imgEl.src = `https://loremflickr.com/320/320/${encodeURIComponent(category)}`;
+                imgEl.classList.remove('hidden');
+                loader.classList.add('hidden');
+            }
+        }
 
         const tapOverlay = document.getElementById('tap-to-reveal');
         const roleContent = document.getElementById('role-content');
@@ -314,14 +348,38 @@
         tapOverlay.addEventListener('mouseup', () => { hide(); });
         tapOverlay.addEventListener('mouseleave', () => { hide(); });
 
+        socket.on('gameStarted', (data) => {
+            // El servidor envía la lista de jugadores, buscamos si estamos eliminados
+            const me = data.players.find(p => p.name === localStorage.getItem('playerName'));
+            if (me && me.eliminated) {
+                // Si ya estamos eliminados de una ronda anterior, nos quedamos en modo fantasma
+                showScreen('results');
+                document.getElementById('mobile-reveal').classList.add('hidden');
+            } else {
+                showScreen('waiting'); // Esperamos a receiveRole
+            }
+        });
+
         socket.on('startVoting', (data) => {
+            // Verificar si el jugador actual está vivo en esta ronda
+            socket.emit('checkStatus', (status) => {
+                if (status && status.eliminated) {
+                    showScreen('results');
+                    document.getElementById('results-title').textContent = "Estás Eliminado";
+                } else {
+                    renderVotingList(data);
+                }
+            });
+        });
+
+        function renderVotingList(data) {
             const list = document.getElementById('voting-list');
             list.innerHTML = '';
             document.getElementById('vote-wait').classList.add('hidden');
             list.classList.remove('hidden');
 
             data.players.forEach(p => {
-                if(p === data.me) return; // Puedes ocultarte a ti mismo u opcional omitir esta linea
+                if(p === localStorage.getItem('playerName')) return;
                 const btn = document.createElement('button');
                 btn.className = 'w-full bg-black/40 hover:bg-red-900/50 text-white font-bold py-4 px-6 rounded-xl border border-white/10 transition flex items-center justify-between group';
                 btn.innerHTML = `<span>${p}</span> <i class="fas fa-gavel text-gray-600 group-hover:text-red-400 transition"></i>`;
@@ -332,25 +390,34 @@
                 };
                 list.appendChild(btn);
             });
-
             showScreen('voting');
-        });
+        }
 
         socket.on('impostorRevealed', (data) => {
             showScreen('results');
+            const mobileRev = document.getElementById('mobile-reveal');
             const nameEl = document.getElementById('revealed-name');
-            nameEl.textContent = data.impostors.join(", ");
-            document.getElementById('revealed-word').textContent = data.word;
-            document.getElementById('mobile-reveal').classList.remove('hidden');
+            const wordEl = document.getElementById('revealed-word');
             
-            // Nice little animation effect
-            nameEl.classList.add('scale-110');
-            setTimeout(() => nameEl.classList.remove('scale-110'), 300);
+            mobileRev.classList.remove('hidden');
+            nameEl.textContent = data.eliminatedName;
+            wordEl.textContent = data.word;
+
+            // Cambiar color según si era impostor o no
+            if (data.isImpostor) {
+                nameEl.className = "text-3xl font-black text-green-500 animate-bounce";
+            } else {
+                nameEl.className = "text-3xl font-black text-red-500";
+            }
+            
+            if (data.gameEnded) {
+                // Si el juego termina, mostramos quién ha ganado
+                document.getElementById('results-title').textContent = "¡FIN DE PARTIDA!";
+            }
         });
 
-        socket.on('backToLobby', () => {
-            document.getElementById('mobile-reveal').classList.add('hidden');
-            showScreen('waiting');
+        socket.on('returnToLobby', () => {
+            location.reload(); // Recarga limpia
         });
 
     </script>
