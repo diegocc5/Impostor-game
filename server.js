@@ -127,6 +127,44 @@ const WORD_BANK = {
         { word: "Adolf Hitler", taboos: ["Alemania", "Guerra", "Bigote", "Nazismo"] },
         { word: "Cristóbal Colón", taboos: ["Descubrir", "Barcos", "América", "Indias"] }
     ],
+    "Redes y Apps": [
+        { word: "TikTok", taboos: ["Videos", "Bailar", "Scroll", "China"] },
+        { word: "Instagram", taboos: ["Fotos", "Historias", "Post", "Meta"] },
+        { word: "BeReal", taboos: ["Ahora", "Notificación", "Foto", "Real"] },
+        { word: "Discord", taboos: ["Servidor", "Hablar", "Gamers", "Canal"] },
+        { word: "Snapchat", taboos: ["Filtros", "Fuego", "Racha", "Amarillo"] },
+        { word: "WhatsApp", taboos: ["Chat", "Verde", "Mensaje", "Estados"] },
+        { word: "Tinder", taboos: ["Ligoteo", "Swipe", "Match", "Fuego"] },
+        { word: "Spotify", taboos: ["Música", "Canción", "Escuchar", "Verde"] }
+    ],
+    "Marcas Z": [
+        { word: "Nike / Jordan", taboos: ["Zapatillas", "Logo", "Deporte", "Air"] },
+        { word: "Adidas", taboos: ["Rayas", "Zapatillas", "Chándal", "Deporte"] },
+        { word: "Apple / iPhone", taboos: ["Móvil", "Manzana", "Caro", "iOS"] },
+        { word: "Tesla", taboos: ["Coche", "Elon Musk", "Eléctrico", "Batería"] },
+        { word: "Starbucks", taboos: ["Café", "Vaso", "Nombre", "Sirena"] },
+        { word: "Prime", taboos: ["Bebida", "Logan Paul", "Botella", "Hidratación"] },
+        { word: "Shein", taboos: ["Ropa", "Barato", "China", "Online"] },
+        { word: "Crocs", taboos: ["Zuecos", "Agujeros", "Pies", "Goma"] }
+    ],
+    "Jerga y Memes": [
+        { word: "Rizz", taboos: ["Ligar", "Carisma", "Estilo", "Jóvenes"] },
+        { word: "Ghosting", taboos: ["Ignorar", "WhatsApp", "Desaparecer", "Mensaje"] },
+        { word: "Red Flag", taboos: ["Alerta", "Malo", "Tóxico", "Pareja"] },
+        { word: "Pov", taboos: ["Punto de vista", "TikTok", "Perspectiva", "Cámara"] },
+        { word: "NPC", taboos: ["Personaje", "Raro", "Videojuego", "Repetitivo"] },
+        { word: "Cringe", taboos: ["Vergüenza", "Ajena", "Grima", "Incomodidad"] }
+    ],
+    "Videojuegos Pro": [
+        { word: "Fortnite", taboos: ["Construir", "Pavo", "Skin", "Bailar"] },
+        { word: "Minecraft", taboos: ["Bloques", "Cubo", "Diamante", "Steve"] },
+        { word: "Roblox", taboos: ["Juegos", "Brookhaven", "Avataro", "Plataforma"] },
+        { word: "Valorant", taboos: ["Agentes", "Disparos", "Skins", "Riot"] },
+        { word: "FIFA / FC", taboos: ["Fútbol", "Cartas", "Sobres", "Mando"] },
+        { word: "League of Legends", taboos: ["LOL", "Torre", "Nexo", "Toxicidad"] },
+        { word: "Among Us", taboos: ["Nave", "Impostor", "Venteo", "Rojo"] },
+        { word: "Call of Duty", taboos: ["Guerra", "Armas", "Warzone", "Disparos"] }
+    ],
     "Influencers": [
         { word: "Plex", taboos: ["Mundo", "Capibara", "YouTube", "Frank Cuesta"] },
         { word: "AuronPlay", taboos: ["Broma", "Zumos", "Twitch", "Abduzcan"] },
