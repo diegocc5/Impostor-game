@@ -359,8 +359,16 @@
 
         const trigger  = document.getElementById('host-role-trigger');
         const rContent = document.getElementById('host-role-content');
-        function revealHost() { trigger.style.opacity = '0'; rContent.classList.remove('blur-[10px]'); }
-        function hideHost()   { trigger.style.opacity = '1'; rContent.classList.add('blur-[10px]'); }
+        function revealHost() { 
+            trigger.style.opacity = '0'; 
+            trigger.style.pointerEvents = 'none';
+            rContent.classList.remove('blur-[10px]'); 
+        }
+        function hideHost() { 
+            trigger.style.opacity = '1'; 
+            trigger.style.pointerEvents = 'auto';
+            rContent.classList.add('blur-[10px]'); 
+        }
         trigger.addEventListener('mousedown',  revealHost);
         trigger.addEventListener('mouseup',    hideHost);
         trigger.addEventListener('mouseleave', hideHost);
@@ -542,7 +550,6 @@
         });
 
         socket.on('returnToLobby', () => {
-            // No recargamos para no perder la conexión ni resetear la sala en el servidor
             if (timerInterval) clearInterval(timerInterval);
             secondsRemaining = 300;
             updateTimer();
@@ -552,13 +559,13 @@
             document.getElementById('next-round-btn').classList.add('hidden');
             document.getElementById('restart-btn').classList.add('hidden');
             document.getElementById('host-voting-panel').classList.add('hidden');
+            document.getElementById('vote-counter-badge').classList.remove('hidden');
             
-            // Volver al lobby
+            // Resetear contadores (se actualizarán con el evento playerJoined que llega del servidor)
+            connectedPlayers = 0;
+            alivePlayers = 0;
+            
             showScreen('lobby');
-            
-            // La lista de jugadores se actualizará sola si emitimos un evento o si el servidor lo hace
-            // Pero como no hemos desconectado, el estado 'connectedPlayers' sigue siendo válido
-            alivePlayers = connectedPlayers;
         });
 
     </script>

@@ -184,11 +184,12 @@ io.on('connection', (socket) => {
     // Host reclama el rol de anfitrión
     socket.on('registerAsHost', () => {
         roomState.hostSocketId = socket.id;
-        // Generar un nuevo código de sala 4 dígitos
-        roomState.roomCode = Math.floor(1000 + Math.random() * 9000).toString();
-        roomState.players = [];
-        roomState.votes = {};
-        roomState.status = 'lobby';
+        // Solo resetear completamente si no hay partida en curso
+        if (roomState.status === 'lobby') {
+            roomState.roomCode = Math.floor(1000 + Math.random() * 9000).toString();
+            roomState.players = [];
+            roomState.votes = {};
+        }
         socket.emit('hostRegistered', { roomCode: roomState.roomCode, ip: LOCAL_IP });
         console.log(`Host registrado. Código: ${roomState.roomCode}`);
     });
@@ -243,6 +244,8 @@ io.on('connection', (socket) => {
     // --- GAME LOGIC ---
     socket.on('startGame', (settings) => {
         if (socket.id !== roomState.hostSocketId) return;
+        // Validar mínimo de jugadores en el servidor
+        if (roomState.players.length < 3) return;
 
         roomState.gameSettings = settings;
         roomState.status = 'playing';
@@ -321,6 +324,8 @@ io.on('connection', (socket) => {
     socket.on('submitVote', (votedName) => {
         const voter = roomState.players.find(p => p.socketId === socket.id);
         if (!voter || voter.eliminated || roomState.status !== 'voting') return;
+        // Rechazar votos duplicados
+        if (roomState.votes[voter.name] !== undefined) return;
 
         roomState.votes[voter.name] = votedName;
         const totalVotes = Object.keys(roomState.votes).length;
@@ -398,10 +403,18 @@ io.on('connection', (socket) => {
             winnerRole = "impostors";
         }
 
+        // Derivar el rol del eliminado de los flags booleanos (roleData.role no existe)
+        const eliminatedRole = expelledPlayer
+            ? (expelledPlayer.roleData.isImpostor ? 'impostor'
+             : expelledPlayer.roleData.isJester   ? 'jester'
+             : expelledPlayer.roleData.isTwin     ? 'twin'
+             : 'citizen')
+            : 'citizen';
+
         const revealData = {
             eliminatedName: expelledName,
             isImpostor: expelledPlayer ? expelledPlayer.roleData.isImpostor : false,
-            eliminatedRole: expelledPlayer ? expelledPlayer.roleData.role : 'ciudadano',
+            eliminatedRole,
             word: roomState.pickedWord.word,
             category: roomState.pickedWord.category,
             gameEnded,

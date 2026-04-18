@@ -123,11 +123,7 @@
             <p class="text-gray-400 font-medium mb-8">Debate y mira la pantalla del anfitrión.</p>
 
             <div id="mobile-reveal" class="hidden bg-black/40 border-2 border-red-500/50 rounded-2xl p-6 shadow-[0_0_30px_rgba(239,68,68,0.2)] mt-4 backdrop-blur-xl">
-                <p class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-1">El impostor era:</p>
-                <p class="text-3xl font-black text-red-500 drop-shadow-md" id="revealed-name"></p>
-                <div class="my-5 border-t border-white/10"></div>
-                <p class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-1">Palabra secreta:</p>
-                <p class="text-2xl font-bold text-yellow-400 drop-shadow-md" id="revealed-word"></p>
+                <!-- Se inyecta dinámicamente por JS -->
             </div>
         </div>
 
@@ -206,7 +202,14 @@
 
         // --- RECIBIR ROL ---
         socket.on('receiveRole', (roleData) => {
-            amEliminated = false;
+            // Solo resetear amEliminated si el jugador NO estaba eliminado (partida nueva)
+            // Si estaba eliminado (siguiente ronda) mantener su estado
+            if (!amEliminated) {
+                amEliminated = false;
+            } else {
+                // Está eliminado pero recibió un rol (no debería pasar, ignorar)
+                return;
+            }
             const content = document.getElementById('role-content');
             
             let tabooHtml = '';
@@ -305,8 +308,16 @@
         const tapOverlay = document.getElementById('tap-to-reveal');
         const roleContent = document.getElementById('role-content');
 
-        function reveal() { tapOverlay.style.opacity = '0'; roleContent.classList.remove('reveal-blur'); }
-        function hide()   { tapOverlay.style.opacity = '1'; roleContent.classList.add('reveal-blur'); }
+        function reveal() { 
+            tapOverlay.style.opacity = '0'; 
+            tapOverlay.style.pointerEvents = 'none';
+            roleContent.classList.remove('reveal-blur'); 
+        }
+        function hide() { 
+            tapOverlay.style.opacity = '1'; 
+            tapOverlay.style.pointerEvents = 'auto';
+            roleContent.classList.add('reveal-blur'); 
+        }
 
         tapOverlay.addEventListener('touchstart', (e) => { e.preventDefault(); reveal(); });
         tapOverlay.addEventListener('touchend',   (e) => { e.preventDefault(); hide(); });
@@ -408,7 +419,11 @@
             // Reset de UI de votación
             document.getElementById('vote-wait').classList.add('hidden');
             document.getElementById('voting-list').innerHTML = '';
-            // Volver a la sala de espera
+            document.getElementById('mobile-reveal').classList.add('hidden');
+            // Resetear título de resultados
+            const h2 = document.querySelector('#player-results h2');
+            if (h2) h2.textContent = 'Votación en Curso';
+            // Volver a la sala de espera (el jugador ya está registrado en el servidor)
             showScreen('waiting');
         });
 
