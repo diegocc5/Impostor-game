@@ -264,13 +264,29 @@ io.on('connection', (socket) => {
 
         const activePlayers = roomState.players;
         const numPlayers = activePlayers.length;
+
+        // ─── Resolver número de impostores según el modo ───────────────────────
+        let resolvedImpostors;
+        if (settings.numImpostors === 'random') {
+            // Aleatorio total: entre 1 y N-1
+            resolvedImpostors = Math.floor(Math.random() * (numPlayers - 1)) + 1;
+        } else if (settings.numImpostors === 'balanced') {
+            // Aleatorio equilibrado: impostores < ciudadanos+bufón+gemelos
+            // => impostores < numPlayers - impostores => impostores < numPlayers/2
+            const maxImpostors = Math.floor((numPlayers - 1) / 2);
+            resolvedImpostors = Math.floor(Math.random() * maxImpostors) + 1;
+        } else {
+            resolvedImpostors = parseInt(settings.numImpostors) || 1;
+        }
+        // Garantizar al menos 1 y como mucho N-1
+        resolvedImpostors = Math.max(1, Math.min(resolvedImpostors, numPlayers - 1));
         
         // Asignación de Roles
         let indices = activePlayers.map((_, i) => i);
         function pull() { return indices.splice(Math.floor(Math.random() * indices.length), 1)[0]; }
 
         const impostorIndices = [];
-        for(let i=0; i < (settings.numImpostors || 1); i++) {
+        for(let i = 0; i < resolvedImpostors; i++) {
             if (indices.length > 0) impostorIndices.push(pull());
         }
         
@@ -280,6 +296,8 @@ io.on('connection', (socket) => {
         // Primero notificamos que el juego empieza (players van a waiting)
         io.emit('gameStarted', { 
             category: roomState.pickedWord.category,
+            numImpostors: resolvedImpostors,
+            impostorMode: settings.numImpostors,
             players: roomState.players.map(p => ({ name: p.name, eliminated: false }))
         });
 

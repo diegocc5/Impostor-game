@@ -81,6 +81,8 @@
                         <option value="2">2 Impostores</option>
                         <option value="3">3 Impostores</option>
                         <option value="4">4 Impostores</option>
+                        <option value="random">🎲 Aleatorio Total</option>
+                        <option value="balanced">⚖️ Aleatorio Equilibrado</option>
                     </select>
                     <div class="flex items-center justify-between">
                         <div>
@@ -149,6 +151,13 @@
             <div class="relative z-10 w-full max-w-sm mx-auto mb-10">
                 <p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-2">Tema de la ronda</p>
                 <div id="category-display" class="text-3xl text-yellow-400 font-black p-5 bg-black/50 border border-yellow-500/30 rounded-2xl shadow-inner w-full">Cargando categoría...</div>
+            </div>
+
+            <div id="impostor-count-display" class="hidden relative z-10 max-w-sm mx-auto mb-6">
+                <div class="bg-red-950/40 border border-red-500/30 rounded-2xl px-6 py-3 flex items-center justify-center gap-3">
+                    <i class="fas fa-user-ninja text-red-400"></i>
+                    <span id="impostor-count-text" class="text-red-300 font-bold text-sm uppercase tracking-widest"></span>
+                </div>
             </div>
 
             <!-- Host Secret Role (if playing) -->
@@ -308,6 +317,17 @@
         socket.on('gameStarted', (data) => {
             alivePlayers = (data.players || []).filter(p => !p.eliminated).length || connectedPlayers;
             document.getElementById('category-display').textContent = data.category;
+
+            // Mostrar info de impostores (útil en modos aleatorios)
+            const impostorDisplay = document.getElementById('impostor-count-display');
+            const impostorText = document.getElementById('impostor-count-text');
+            if (data.impostorMode === 'random' || data.impostorMode === 'balanced') {
+                const modeLabel = data.impostorMode === 'random' ? '🎲 Aleatorio Total' : '⚖️ Equilibrado';
+                impostorText.textContent = `${modeLabel} — ${data.numImpostors} impostor${data.numImpostors > 1 ? 'es' : ''}`;
+                impostorDisplay.classList.remove('hidden');
+            } else {
+                impostorDisplay.classList.add('hidden');
+            }
             secondsRemaining = 300;
             updateTimer();
             if (timerInterval) clearInterval(timerInterval);
