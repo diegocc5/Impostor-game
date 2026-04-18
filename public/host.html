@@ -14,6 +14,12 @@
         .glass-panel { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
         .animate-float { animation: float 6s ease-in-out infinite; }
         @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.8); }
     </style>
 </head>
 <body class="text-white flex flex-col items-center pt-10 pb-20 relative overflow-x-hidden">
@@ -97,6 +103,13 @@
                 </div>
 
                 <div class="bg-black/40 p-6 rounded-2xl border border-white/10 shadow-inner relative overflow-hidden">
+                    <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-3 flex items-center">
+                        <i class="fas fa-tags mr-2 text-blue-500/50"></i> Temas Disponibles
+                    </p>
+                    <div id="category-selector" class="grid grid-cols-2 gap-2 bg-gray-900/30 p-3 rounded-xl border border-white/5 max-h-40 overflow-y-auto custom-scrollbar mb-4">
+                        <!-- Categorías inyectadas dinámicamente -->
+                    </div>
+
                     <div class="absolute top-0 right-0 p-3 opacity-10"><i class="fas fa-mask text-6xl text-white"></i></div>
                     <h4 class="text-gray-400 font-bold uppercase tracking-widest text-xs mb-4 relative z-10">Roles Avanzados</h4>
 
@@ -249,6 +262,22 @@
             const qrBox = document.getElementById('qr-container');
             qrBox.innerHTML = '';
             new QRCode(qrBox, { text: url, width: 220, height: 220, colorDark: '#ffffff', colorLight: '#00000000', correctLevel: QRCode.CorrectLevel.M });
+            
+            // Inyectar categorías
+            const catBox = document.getElementById('category-selector');
+            if (catBox && data.categories) {
+                catBox.innerHTML = '';
+                data.categories.forEach(cat => {
+                    const label = document.createElement('label');
+                    label.className = 'flex items-center space-x-2 text-xs bg-gray-800 p-2 rounded-lg cursor-pointer hover:bg-gray-700 transition border border-white/5';
+                    label.innerHTML = `
+                        <input type="checkbox" value="${cat}" checked class="rounded border-gray-600 bg-gray-900 text-blue-500 focus:ring-blue-500 category-checkbox">
+                        <span class="text-gray-300 font-medium truncate">${cat}</span>
+                    `;
+                    catBox.appendChild(label);
+                });
+            }
+
             setTimeout(() => {
                 const img    = qrBox.querySelector('img');
                 const canvas = qrBox.querySelector('canvas');
@@ -306,9 +335,13 @@
 
         // ─── INICIAR PARTIDA ───────────────────────────────────────────────────
         document.getElementById('start-btn').addEventListener('click', () => {
+            // Recoger categorías seleccionadas
+            const selectedCats = Array.from(document.querySelectorAll('.category-checkbox:checked')).map(cb => cb.value);
+            
             socket.emit('startGame', {
+                selectedCategories: selectedCats,
                 giveHint:    document.getElementById('hint-toggle').checked,
-                numImpostors: parseInt(document.getElementById('num-impostors').value) || 1,
+                numImpostors: document.getElementById('num-impostors').value,
                 hasJester:   document.getElementById('jester-toggle').checked,
                 hasTwins:    document.getElementById('twins-toggle').checked,
                 isTabooMode: document.getElementById('taboo-toggle').checked

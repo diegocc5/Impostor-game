@@ -155,16 +155,6 @@ const WORD_BANK = {
         { word: "NPC", taboos: ["Personaje", "Raro", "Videojuego", "Repetitivo"] },
         { word: "Cringe", taboos: ["Vergüenza", "Ajena", "Grima", "Incomodidad"] }
     ],
-    "Videojuegos Pro": [
-        { word: "Fortnite", taboos: ["Construir", "Pavo", "Skin", "Bailar"] },
-        { word: "Minecraft", taboos: ["Bloques", "Cubo", "Diamante", "Steve"] },
-        { word: "Roblox", taboos: ["Juegos", "Brookhaven", "Avataro", "Plataforma"] },
-        { word: "Valorant", taboos: ["Agentes", "Disparos", "Skins", "Riot"] },
-        { word: "FIFA / FC", taboos: ["Fútbol", "Cartas", "Sobres", "Mando"] },
-        { word: "League of Legends", taboos: ["LOL", "Torre", "Nexo", "Toxicidad"] },
-        { word: "Among Us", taboos: ["Nave", "Impostor", "Venteo", "Rojo"] },
-        { word: "Call of Duty", taboos: ["Guerra", "Armas", "Warzone", "Disparos"] }
-    ],
     "Influencers": [
         { word: "Plex", taboos: ["Mundo", "Capibara", "YouTube", "Frank Cuesta"] },
         { word: "AuronPlay", taboos: ["Broma", "Zumos", "Twitch", "Abduzcan"] },
@@ -228,7 +218,11 @@ io.on('connection', (socket) => {
             roomState.players = [];
             roomState.votes = {};
         }
-        socket.emit('hostRegistered', { roomCode: roomState.roomCode, ip: LOCAL_IP });
+        socket.emit('hostRegistered', { 
+            roomCode: roomState.roomCode, 
+            ip: LOCAL_IP,
+            categories: Object.keys(WORD_BANK)
+        });
         console.log(`Host registrado. Código: ${roomState.roomCode}`);
     });
 
@@ -288,10 +282,36 @@ io.on('connection', (socket) => {
         roomState.gameSettings = settings;
         roomState.status = 'playing';
 
-        if (unusedWords.length === 0) initializeWordBank();
+        // ─── Selección de Palabra por Categorías ───────────────────────────────
+        let pool = [];
+        const selected = settings.selectedCategories || [];
         
-        const randomIdx = Math.floor(Math.random() * unusedWords.length);
-        roomState.pickedWord = unusedWords.splice(randomIdx, 1)[0];
+        // Si no hay categorías seleccionadas, usamos todas las disponibles
+        const categoriesToUse = selected.length > 0 ? selected : Object.keys(WORD_BANK);
+        
+        // Filtrar palabras no usadas que pertenezcan a las categorías elegidas
+        pool = unusedWords.filter(w => categoriesToUse.includes(w.category));
+
+        // Si se agotan las palabras de esas categorías, reiniciamos el banco para esas categorías
+        if (pool.length === 0) {
+            categoriesToUse.forEach(cat => {
+                if (WORD_BANK[cat]) {
+                    WORD_BANK[cat].forEach(item => {
+                        unusedWords.push({ category: cat, word: item.word, taboos: item.taboos });
+                    });
+                }
+            });
+            pool = unusedWords.filter(w => categoriesToUse.includes(w.category));
+        }
+        
+        const randomPoolIdx = Math.floor(Math.random() * pool.length);
+        const picked = pool[randomPoolIdx];
+        
+        // Eliminar del banco global para que no se repita pronto
+        const globalIdx = unusedWords.findIndex(w => w.word === picked.word && w.category === picked.category);
+        if (globalIdx !== -1) unusedWords.splice(globalIdx, 1);
+        
+        roomState.pickedWord = picked;
 
         // Inicializar jugadores como "vivos"
         roomState.players.forEach(p => { 
