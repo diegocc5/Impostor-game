@@ -153,13 +153,6 @@
                 <div id="category-display" class="text-3xl text-yellow-400 font-black p-5 bg-black/50 border border-yellow-500/30 rounded-2xl shadow-inner w-full">Cargando categoría...</div>
             </div>
 
-            <div id="impostor-count-display" class="hidden relative z-10 max-w-sm mx-auto mb-6">
-                <div class="bg-red-950/40 border border-red-500/30 rounded-2xl px-6 py-3 flex items-center justify-center gap-3">
-                    <i class="fas fa-user-ninja text-red-400"></i>
-                    <span id="impostor-count-text" class="text-red-300 font-bold text-sm uppercase tracking-widest"></span>
-                </div>
-            </div>
-
             <!-- Host Secret Role (if playing) -->
             <div id="host-secret-role" class="hidden mb-12 relative z-10 max-w-sm mx-auto">
                 <div class="bg-indigo-900/40 p-1 rounded-2xl border-2 border-indigo-500/50 relative overflow-hidden cursor-pointer shadow-[0_0_20px_rgba(99,102,241,0.3)]">
@@ -317,17 +310,6 @@
         socket.on('gameStarted', (data) => {
             alivePlayers = (data.players || []).filter(p => !p.eliminated).length || connectedPlayers;
             document.getElementById('category-display').textContent = data.category;
-
-            // Mostrar info de impostores (útil en modos aleatorios)
-            const impostorDisplay = document.getElementById('impostor-count-display');
-            const impostorText = document.getElementById('impostor-count-text');
-            if (data.impostorMode === 'random' || data.impostorMode === 'balanced') {
-                const modeLabel = data.impostorMode === 'random' ? '🎲 Aleatorio Total' : '⚖️ Equilibrado';
-                impostorText.textContent = `${modeLabel} — ${data.numImpostors} impostor${data.numImpostors > 1 ? 'es' : ''}`;
-                impostorDisplay.classList.remove('hidden');
-            } else {
-                impostorDisplay.classList.add('hidden');
-            }
             secondsRemaining = 300;
             updateTimer();
             if (timerInterval) clearInterval(timerInterval);

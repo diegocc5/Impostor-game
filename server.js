@@ -293,11 +293,12 @@ io.on('connection', (socket) => {
         let jesterIndex = (settings.hasJester && indices.length > 0) ? pull() : null;
         let twinIndices = (settings.hasTwins && indices.length >= 2) ? [pull(), pull()] : [];
 
+        // Guardar el modo en el estado global para usarlo en processElimination
+        roomState.impostorMode = settings.numImpostors;
+
         // Primero notificamos que el juego empieza (players van a waiting)
         io.emit('gameStarted', { 
             category: roomState.pickedWord.category,
-            numImpostors: resolvedImpostors,
-            impostorMode: settings.numImpostors,
             players: roomState.players.map(p => ({ name: p.name, eliminated: false }))
         });
 
@@ -409,17 +410,22 @@ io.on('connection', (socket) => {
             }
         });
 
-        // 4. Comprobar victorias estándar
+        // 4. Comprobar victorias según el modo de impostores
         const aliveImpostors = roomState.players.filter(p => !p.eliminated && !p.disconnected && p.roleData.isImpostor);
-        const aliveCitizens = roomState.players.filter(p => !p.eliminated && !p.disconnected && !p.roleData.isImpostor && !p.roleData.isJester);
+        const aliveCitizens  = roomState.players.filter(p => !p.eliminated && !p.disconnected && !p.roleData.isImpostor && !p.roleData.isJester);
 
         if (aliveImpostors.length === 0) {
+            // Condición universal: sin impostores vivos → ciudadanos ganan
             gameEnded = true;
-            winnerRole = "citizens";
-        } else if (aliveImpostors.length >= aliveCitizens.length) {
-            gameEnded = true;
-            winnerRole = "impostors";
+            winnerRole = 'citizens';
+        } else if (roomState.impostorMode !== 'random') {
+            // En modo fijo y equilibrado: impostores ganan si igualan o superan a ciudadanos
+            if (aliveImpostors.length >= aliveCitizens.length) {
+                gameEnded = true;
+                winnerRole = 'impostors';
+            }
         }
+        // En modo 'random': solo se acaba cuando no quedan impostores (los ciudadanos deben cazar a todos)
 
         // Derivar el rol del eliminado de los flags booleanos (roleData.role no existe)
         const eliminatedRole = expelledPlayer
