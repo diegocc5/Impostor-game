@@ -166,7 +166,9 @@ const WORD_BANK = {
         { word: "Khaby Lame", taboos: ["Manos", "Gesto", "TikTok", "Silencio"] },
         { word: "Xokas", taboos: ["Gritos", "Comida", "Twitter", "Twitch"] },
         { word: "Lola Lolita", taboos: ["TikTok", "Baile", "Hambre", "Influencer"] },
-        { word: "Aitana", taboos: ["Cantante", "OT", "Alpha", "Sebastian Yatra"] }
+        { word: "Aitana", taboos: ["Cantante", "OT", "Alpha", "Sebastian Yatra"] },
+        { word: "Agustin51", taboos: ["Fortnite", "Sevilla", "Gritos", "Grefg"] },
+        { word: "Ampeter", taboos: ["Fortnite", "Casa", "Moto", "Grefg"] }
     ],
     "Series y Películas": [
         { word: "Harry Potter", taboos: ["Magia", "Gafas", "Varita", "Cicatriz"] },
@@ -183,10 +185,6 @@ const WORD_BANK = {
         { word: "Toy Story", taboos: ["Juguetes", "Woody", "Buzz", "Amigo"] },
         { word: "Avengers", taboos: ["Marvel", "Héroes", "Thanos", "Vengadores"] },
         { word: "Avatar", taboos: ["Azul", "Planeta", "Pandora", "Cine"] }
-    ],
-    "Influenciadores Extra": [
-        { word: "Agustin51", taboos: ["Fortnite", "Sevilla", "Gritos", "Grefg"] },
-        { word: "Ampeter", taboos: ["Fortnite", "Casa", "Moto", "Grefg"] }
     ]
 };
 
