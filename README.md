@@ -31,7 +31,7 @@
 
 No es necesario instalar nada para jugar. Puedes acceder directamente a través del enlace de despliegue:
 
-👉 **[Jugar a El Impostor](https://impostor-game.onrender.com)** *(Sustituir por tu link real si es otro)*
+👉 **[Jugar a El Impostor](https://impostor-game-e6ul.onrender.com/host.html)**
 
 > [!NOTE]
 > **Nota sobre el servidor**: Si el juego no se ha usado recientemente, el servidor puede tardar unos **50 segundos** en "despertar" debido a la configuración del plan gratuito (Render). Una vez encendido, la conexión es instantánea.
