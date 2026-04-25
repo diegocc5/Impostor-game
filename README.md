@@ -79,4 +79,4 @@ Si prefieres ejecutar el juego en tu propia máquina para desarrollo o juego off
 *   **v1.5.0**: Mejoras críticas en la lógica de eliminación y sistema de privacidad de palabras.
 
 ---
-Desarrollado con ❤️ por **Diego** y **Antigravity AI**.
+Desarrollado con ❤️ por **Diego**.
