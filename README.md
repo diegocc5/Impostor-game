@@ -27,9 +27,18 @@
 *   **Frontend**: HTML5, Vanilla JavaScript y Tailwind CSS para el diseño.
 *   **APIs Externas**: Integración con la API de Wikipedia para mostrar imágenes automáticas de los temas.
 
-## 📦 Instalación y Despliegue Local
+## 🌐 Acceso Rápido
 
-Si quieres ejecutar el juego en tu propia máquina:
+No es necesario instalar nada para jugar. Puedes acceder directamente a través del enlace de despliegue:
+
+👉 **[Jugar a El Impostor](https://impostor-game.onrender.com)** *(Sustituir por tu link real si es otro)*
+
+> [!NOTE]
+> **Nota sobre el servidor**: Si el juego no se ha usado recientemente, el servidor puede tardar unos **50 segundos** en "despertar" debido a la configuración del plan gratuito (Render). Una vez encendido, la conexión es instantánea.
+
+## 📦 Instalación y Despliegue Local (Opcional)
+
+Si prefieres ejecutar el juego en tu propia máquina para desarrollo o juego offline en red local: 
 
 1. **Clona el repositorio**:
    ```bash
